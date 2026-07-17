@@ -1,0 +1,8 @@
+plugins {
+    // подключаем плагины без применения — они будут активированы в модулях
+    id 'com.android.application' version '8.13.0' apply false
+    id 'org.jetbrains.kotlin.android' version '2.0.20' apply false
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.0.20' apply false
+}
+
+// здесь не нужно прописывать repositories или dependencies — всё вынесено в settings.gradle

@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "com.eduappml.app-debug-64:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.eduappml.app-main-66:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.eduappml.app-debug-64:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.eduappml.app-main-66:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.eduappml.app-debug-64:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.eduappml.app-main-66:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.eduappml.app-debug-64:/drawable_splash_background.xml.flat",
+        "source": "com.eduappml.app-main-66:/drawable/splash_background.xml"
+    },
+    {
+        "merged": "com.eduappml.app-debug-64:/drawable_bg_gradient_dark.xml.flat",
+        "source": "com.eduappml.app-main-66:/drawable/bg_gradient_dark.xml"
+    },
+    {
+        "merged": "com.eduappml.app-debug-64:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.eduappml.app-main-66:/drawable/ic_launcher_background.xml"
+    }
+]

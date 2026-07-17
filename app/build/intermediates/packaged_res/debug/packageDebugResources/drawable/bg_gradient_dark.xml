@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Основной градиент: красный → фиолетовый → синий -->
+    <item>
+        <shape>
+            <gradient
+                android:type="linear"
+                android:angle="0"
+                android:startColor="#E63946"
+                android:centerColor="#9C27B0"
+                android:endColor="#1E88E5" />
+        </shape>
+    </item>
+
+    <!-- Затемняющий слой, чтобы белый текст был хорошо читаем -->
+    <item>
+        <shape>
+            <solid android:color="#55000000" />
+        </shape>
+    </item>
+
+</layer-list>
