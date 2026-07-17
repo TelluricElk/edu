@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Базовая тема приложения -->
+    <style name="Theme.EduAppML" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Без тулбара и тайтла -->
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+
+        <!-- Рисуем сами под барами -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+
+        <!-- Полная прозрачность системных баров и фона окна -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+
+        <!-- Работа с «чёлкой» и отключение автоконтраста на старых девайсах -->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+    </style>
+
+    <!-- Системный Splash (Android 12+) -->
+    <style name="Theme.EduAppML.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@android:color/black</item>
+        <item name="postSplashScreenTheme">@style/Theme.EduAppML</item>
+    </style>
+
+</resources>

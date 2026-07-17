@@ -1,0 +1,38 @@
+<resources>
+
+    <style name="Theme.EduAppML" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Фон окна (основной) -->
+        <item name="android:windowBackground">@color/background_dark</item>
+
+        <!-- Цвет фона для активити и фрагментов -->
+        <item name="android:colorBackground">@color/background_dark</item>
+
+        <!-- Цвет для поверхностей (карточки, диалоги) -->
+        <item name="colorSurface">@color/surface_dark</item>
+
+        <!-- Цвет текста по умолчанию -->
+        <item name="android:textColor">@color/text_primary_dark</item>
+
+        <!-- Акцентный цвет (кнопки, выделение) -->
+        <item name="colorPrimary">@color/accent_dark</item>
+        <item name="colorOnPrimary">@color/background_dark</item>
+
+        <!-- Вторичный акцент -->
+        <item name="colorSecondary">@color/accent_dark</item>
+        <item name="colorOnSecondary">@color/background_dark</item>
+
+        <!-- Статус-бар и навигационная панель (тоже тёмные) -->
+        <item name="android:statusBarColor">@color/background_dark</item>
+        <item name="android:navigationBarColor">@color/background_dark</item>
+
+        <!-- Чтобы текст на кнопках был читаемым -->
+        <item name="android:buttonStyle">@style/ButtonDark</item>
+    </style>
+
+    <!-- Стиль для кнопок в тёмной теме -->
+    <style name="ButtonDark" parent="Widget.Material3.Button">
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="android:backgroundTint">@color/button_background_dark</item>
+    </style>
+
+</resources>
