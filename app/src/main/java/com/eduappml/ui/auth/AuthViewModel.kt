@@ -2,6 +2,7 @@ package com.eduappml.ui.auth
 
 import android.content.Context
 import android.util.Log
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eduappml.data.models.*
@@ -49,7 +50,6 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                     val body = response.body()
                     // При включённом подтверждении email access_token не приходит, и это нормально
                     if (body != null && body.user != null) {
-                        // Сохраняем данные для последующего входа и обновления профиля
                         pendingRegistration = PendingRegistration(
                             email = email,
                             password = password,
@@ -59,10 +59,7 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                         )
                         pendingEmail = email
 
-                        // Отправляем код через Edge Function
                         sendVerificationCode(email)
-
-                        // Переход на экран ввода кода (без проверки токена)
                         _uiState.value = AuthUiState.NeedsVerification
                     } else {
                         _uiState.value = AuthUiState.Error("Ошибка регистрации: пользователь не создан")
@@ -89,15 +86,13 @@ class AuthViewModel(private val context: Context) : ViewModel() {
             val response = ApiClient.authApi.sendVerificationCode(SendCodeRequest(email))
             if (response.isSuccessful) {
                 val body = response.body()
-                Log.d(TAG, "sendVerificationCode response: $body")
                 if (body?.success == true) {
                     Log.d(TAG, "Code sent successfully")
                 } else {
                     Log.e(TAG, "sendVerificationCode failed: ${body?.message}")
                 }
             } else {
-                val error = response.errorBody()?.string()
-                Log.e(TAG, "sendVerificationCode HTTP error: $error")
+                Log.e(TAG, "sendVerificationCode HTTP error: ${response.errorBody()?.string()}")
             }
         } catch (e: Exception) {
             Log.e(TAG, "sendVerificationCode exception: ${e.message}")
@@ -119,8 +114,6 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                     VerifyCodeRequest(pending.email, code)
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
-                    // Код верен – выполняем вход с email и паролем
-                    // Теперь пользователь подтверждён, и токен должен прийти
                     login(pending.email, pending.password)
                     pendingRegistration = null
                     pendingEmail = null
@@ -151,7 +144,60 @@ class AuthViewModel(private val context: Context) : ViewModel() {
         }
     }
 
-    // ---------- Вход (используется после проверки кода) ----------
+    // ---------- Вход по email ИЛИ логину (используется на экране входа) ----------
+    fun loginWithIdentifier(identifier: String, password: String) {
+        val trimmed = identifier.trim()
+        if (trimmed.isEmpty() || password.isEmpty()) {
+            _uiState.value = AuthUiState.Error("Заполните все поля")
+            return
+        }
+
+        _uiState.value = AuthUiState.Loading
+        viewModelScope.launch {
+            try {
+                val emailToUse = if (isEmail(trimmed)) {
+                    trimmed
+                } else {
+                    resolveEmailByUsername(trimmed)
+                }
+
+                if (emailToUse == null) {
+                    _uiState.value = AuthUiState.Error("Неверный логин или пароль")
+                    return@launch
+                }
+
+                login(emailToUse, password)
+            } catch (e: IOException) {
+                _uiState.value = AuthUiState.Error("Ошибка сети: ${e.message}")
+            } catch (e: HttpException) {
+                _uiState.value = AuthUiState.Error("Ошибка сервера: ${e.message}")
+            } catch (e: Exception) {
+                _uiState.value = AuthUiState.Error("Неизвестная ошибка: ${e.message}")
+            }
+        }
+    }
+
+    private fun isEmail(value: String): Boolean =
+        Patterns.EMAIL_ADDRESS.matcher(value).matches()
+
+    private suspend fun resolveEmailByUsername(username: String): String? {
+        return try {
+            val response = ApiClient.authApi.getEmailByUsername(
+                mapOf("username_input" to username)
+            )
+            if (response.isSuccessful) {
+                response.body()?.takeIf { it.isNotBlank() }
+            } else {
+                Log.e(TAG, "resolveEmailByUsername error: ${response.errorBody()?.string()}")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "resolveEmailByUsername exception: ${e.message}")
+            null
+        }
+    }
+
+    // ---------- Вход по email (используется после верификации кода и после определения email по логину) ----------
     fun login(email: String, password: String) {
         if (email.isEmpty() || password.isEmpty()) {
             _uiState.value = AuthUiState.Error("Заполните все поля")
@@ -166,7 +212,6 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                 if (response.isSuccessful) {
                     val body = response.body()
                     if (body != null && body.access_token != null && body.user != null) {
-                        // Обновляем профиль (добавляем username и другие данные)
                         val pending = pendingRegistration
                         if (pending != null) {
                             val update = ProfileUpdate(
@@ -185,7 +230,6 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                         }
                         handleAuthSuccess(body.access_token, body.user.id, pending?.username)
                     } else {
-                        // Если токен не пришёл – значит, email не подтверждён (но такого не должно быть)
                         _uiState.value = AuthUiState.Error("Ошибка входа: email не подтверждён")
                     }
                 } else {
@@ -255,7 +299,7 @@ class AuthViewModel(private val context: Context) : ViewModel() {
         object Idle : AuthUiState()
         object Loading : AuthUiState()
         object Success : AuthUiState()
-        object NeedsVerification : AuthUiState()  // ожидание ввода кода
+        object NeedsVerification : AuthUiState()
         data class Error(val message: String) : AuthUiState()
     }
 

@@ -30,7 +30,7 @@ fun LoginScreen(
     val viewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory(context))
     val uiState by viewModel.uiState.collectAsState()
 
-    var email by remember { mutableStateOf("") }
+    var identifier by remember { mutableStateOf("") } // email или логин
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -50,7 +50,7 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "EduAppML",
+                text = "EduApp",
                 fontSize = 36.sp,
                 color = Color.White,
                 style = MaterialTheme.typography.headlineMedium
@@ -58,9 +58,10 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email", color = Color.White.copy(alpha = 0.7f)) },
+                value = identifier,
+                onValueChange = { identifier = it },
+                label = { Text("Email или логин", color = Color.White.copy(alpha = 0.7f)) },
+                singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.Gray,
@@ -107,7 +108,7 @@ fun LoginScreen(
             }
 
             Button(
-                onClick = { viewModel.login(email, password) },
+                onClick = { viewModel.loginWithIdentifier(identifier, password) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = uiState !is AuthViewModel.AuthUiState.Loading
             ) {
