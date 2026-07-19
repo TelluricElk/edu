@@ -55,7 +55,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun SplashForeground(
     modifier: Modifier = Modifier,
-    onFinishedFadeOut: () -> Unit = {}
+    onFinishedFadeOut: () -> Unit = {},
+    onOpenChat: () -> Unit = {}
 ) {
     val contentAlpha = remember { Animatable(1f) }
     var isExiting by remember { mutableStateOf(false) }
@@ -170,6 +171,9 @@ fun SplashForeground(
                             }
                         }
                     }
+                )
+                ChatButton(
+                    onClick = onOpenChat
                 )
             }
         }
@@ -352,6 +356,28 @@ private fun LoadProgressButton(
     ) {
         Text(
             text = "⬇️",
+            fontSize = 22.sp,
+            color = Color.White
+        )
+    }
+}
+
+@Composable
+private fun ChatButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(Color.Black.copy(alpha = 0.4f))
+            .clickable(onClick = onClick)
+            .padding(8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "💬",
             fontSize = 22.sp,
             color = Color.White
         )
