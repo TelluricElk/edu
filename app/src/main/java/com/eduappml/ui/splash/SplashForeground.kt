@@ -1,7 +1,5 @@
 package com.eduappml.ui.splash
 
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
@@ -47,7 +45,6 @@ import com.eduappml.MainActivity
 import com.eduappml.ThemeManager
 import com.eduappml.game.GameManager
 import com.eduappml.managers.SessionManager
-import com.eduappml.managers.SyncManager
 import com.eduappml.ui.auth.AuthViewModel
 import com.eduappml.ui.auth.AuthViewModelFactory
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -76,7 +73,6 @@ fun SplashForeground(
     val isDark = ThemeManager.isDarkThemeActive(context)
     val isGod = GameManager.isGodMode()
     val isLoggedIn = SessionManager.isLoggedIn()
-    val scope = rememberCoroutineScope()
 
     val authViewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory(context))
 
@@ -129,12 +125,6 @@ fun SplashForeground(
                         activity?.recreate()
                     }
                 )
-                ResetProgressButton(
-                    onClick = {
-                        GameManager.resetProgress(context)
-                        activity?.recreate()
-                    }
-                )
                 if (isLoggedIn) {
                     LogoutButton(
                         onClick = {
@@ -143,35 +133,6 @@ fun SplashForeground(
                         }
                     )
                 }
-                SyncButton(
-                    onClick = {
-                        val classic = GameManager.getUnlockedNodes("classic")
-                        val neural = GameManager.getUnlockedNodes("neural")
-                        SyncManager.syncProgress(context, classic, neural)
-                        Toast.makeText(context, "Прогресс отправлен на сервер", Toast.LENGTH_SHORT).show()
-                    }
-                )
-                LoadProgressButton(
-                    onClick = {
-                        scope.launch {
-                            try {
-                                Log.d("SplashForeground", "Loading progress from server...")
-                                val progress = SyncManager.loadProgressFromServer(context)
-                                if (progress != null) {
-                                    SessionManager.saveProgress(progress)
-                                    GameManager.updateFromProgress(progress)
-                                    Toast.makeText(context, "Прогресс загружен с сервера", Toast.LENGTH_SHORT).show()
-                                    activity?.recreate()
-                                } else {
-                                    Toast.makeText(context, "Прогресс на сервере не найден", Toast.LENGTH_SHORT).show()
-                                }
-                            } catch (e: Exception) {
-                                Log.e("SplashForeground", "Load error: ${e.message}")
-                                Toast.makeText(context, "Ошибка загрузки: ${e.message}", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
-                )
                 ChatButton(
                     onClick = onOpenChat
                 )
@@ -275,28 +236,6 @@ private fun ModeToggleButton(
 }
 
 @Composable
-private fun ResetProgressButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .background(Color.Black.copy(alpha = 0.4f))
-            .clickable(onClick = onClick)
-            .padding(8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "↺",
-            fontSize = 22.sp,
-            color = Color.White
-        )
-    }
-}
-
-@Composable
 private fun LogoutButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -312,50 +251,6 @@ private fun LogoutButton(
     ) {
         Text(
             text = "🚪",
-            fontSize = 22.sp,
-            color = Color.White
-        )
-    }
-}
-
-@Composable
-private fun SyncButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .background(Color.Black.copy(alpha = 0.4f))
-            .clickable(onClick = onClick)
-            .padding(8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "🔄",
-            fontSize = 22.sp,
-            color = Color.White
-        )
-    }
-}
-
-@Composable
-private fun LoadProgressButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .background(Color.Black.copy(alpha = 0.4f))
-            .clickable(onClick = onClick)
-            .padding(8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "⬇️",
             fontSize = 22.sp,
             color = Color.White
         )
