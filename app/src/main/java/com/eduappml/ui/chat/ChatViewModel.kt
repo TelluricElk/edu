@@ -45,7 +45,6 @@ class ChatViewModel(private val context: Context) : ViewModel() {
         _messages.value = _messages.value + ChatUiMessage(text = trimmed, isUser = true)
         _isLoading.value = true
 
-        // История для контекста (ошибочные сообщения в неё не включаем)
         val history = _messages.value
             .filterNot { it.isError }
             .map {
@@ -70,29 +69,34 @@ class ChatViewModel(private val context: Context) : ViewModel() {
                         ?: "неизвестная ошибка сервера"
                     Log.e(TAG, "sendMessage error: $err")
                     _messages.value = _messages.value + ChatUiMessage(
-                        text = "Сервер чата пока не настроен или недоступен. Попробуйте позже.",
+                        text = "Сервер чата вернул ошибку. Попробуйте позже.",
                         isUser = false,
                         isError = true
                     )
                 }
             } catch (e: IOException) {
-                Log.e(TAG, "Network error: ${e.message}")
+                Log.e(TAG, "Network error: ${e.message}", e)
                 _messages.value = _messages.value + ChatUiMessage(
                     text = "Не удалось подключиться к серверу чата. Проверьте адрес сервера и подключение к интернету.",
                     isUser = false,
                     isError = true
                 )
             } catch (e: HttpException) {
-                Log.e(TAG, "HTTP error: ${e.message}")
+                Log.e(TAG, "HTTP error: ${e.message}", e)
                 _messages.value = _messages.value + ChatUiMessage(
                     text = "Сервер вернул ошибку. Попробуйте позже.",
                     isUser = false,
                     isError = true
                 )
-            } catch (e: Exception) {
-                Log.e(TAG, "Unknown error: ${e.message}")
+            } catch (t: Throwable) {
+                // Ловим ВСЁ, включая Error (например ExceptionInInitializerError,
+                // если ChatApiClient не смог инициализироваться из-за некорректного
+                // BASE_URL) — чтобы это никогда не роняло приложение целиком,
+                // а показывалось как обычное сообщение об ошибке в чате.
+                Log.e(TAG, "Unexpected error/throwable: ${t.message}", t)
                 _messages.value = _messages.value + ChatUiMessage(
-                    text = "Произошла непредвиденная ошибка.",
+                    text = "Произошла непредвиденная ошибка при обращении к серверу чата. " +
+                            "Проверьте настройки сервера в ChatApiClient.kt (BASE_URL).",
                     isUser = false,
                     isError = true
                 )
