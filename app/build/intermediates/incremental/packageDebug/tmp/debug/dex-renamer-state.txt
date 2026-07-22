@@ -1,4 +1,4 @@
-#Wed Jul 22 17:28:33 MSK 2026
+#Wed Jul 22 18:23:59 MSK 2026
 base.0=C\:\\Users\\sasaa\\yurovskiy\\kozlov\\EduAppML v.19\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
 base.1=C\:\\Users\\sasaa\\yurovskiy\\kozlov\\EduAppML v.19\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
 base.10=C\:\\Users\\sasaa\\yurovskiy\\kozlov\\EduAppML v.19\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\6\\classes.dex
