@@ -12,21 +12,29 @@ import com.eduappml.managers.SessionManager
 import com.eduappml.ui.auth.LoginScreen
 import com.eduappml.ui.auth.RegisterScreen
 import com.eduappml.ui.auth.VerificationScreen
-import com.eduappml.ui.chat.ChatScreen
+import com.eduappml.ui.code.CodeScreen
 import com.eduappml.ui.common.UnifiedBackground
 import com.eduappml.ui.detail.NodeDetailScreen
 import com.eduappml.ui.glossary.GlossaryScreen
-import com.eduappml.ui.info.InfoScreen
 import com.eduappml.ui.interactive.InteractiveScreen
+import com.eduappml.ui.math.MathScreen
 import com.eduappml.ui.menu.MenuScreen
 import com.eduappml.ui.menu.defaultEdges
 import com.eduappml.ui.menu.defaultNodes
+import com.eduappml.ui.result.ResultScreen
 import com.eduappml.ui.splash.SplashForeground
+import com.eduappml.ui.task.TaskScreen
+import com.eduappml.ui.theory.TheoryScreen
 import com.eduappml.ui.third.ThirdScreen
 import com.eduappml.ui.third.thirdEdges
 import com.eduappml.ui.third.thirdNodes
 import kotlin.math.abs
 
+/**
+ * Шесть спутниковых экранов темы (Theory/Task/Math/Code/Interactive/Result)
+ * всегда возвращаются на [NodeDetail] соответствующего узла — а не на общую
+ * карту алгоритмов — поэтому каждый хранит returnTo = сам объект NodeDetail.
+ */
 private sealed class Screen {
     data object Splash : Screen()
     data object Login : Screen()
@@ -34,25 +42,27 @@ private sealed class Screen {
     data object Verification : Screen()
     data object Menu   : Screen()
     data object Third  : Screen()
-    data class Info(
-        val id: String,
-        val returnTo: Screen,
-        val initialTab: Int = 0,
-        val fromDetail: Boolean = false
-    ) : Screen()
     data object Glossary : Screen()
-    data object Chat : Screen()
+
     data class NodeDetail(
         val id: String,
         val label: String,
         val screenType: String,
         val returnTo: Screen
     ) : Screen()
-    data class Interactive(
-        val id: String,
-        val screenType: String,
-        val returnTo: Screen
-    ) : Screen()
+
+    data class Theory(val id: String, val screenType: String, val returnTo: Screen) : Screen()
+    data class Task(val id: String, val screenType: String, val returnTo: Screen) : Screen()
+    data class Math(val id: String, val screenType: String, val returnTo: Screen) : Screen()
+    data class Code(val id: String, val screenType: String, val returnTo: Screen) : Screen()
+    data class Interactive(val id: String, val screenType: String, val returnTo: Screen) : Screen()
+    data class Result(val id: String, val screenType: String, val returnTo: Screen) : Screen()
+}
+
+private fun labelFor(id: String, screenType: String): String = when (screenType) {
+    "classic" -> defaultNodes().find { it.id == id }?.label ?: id
+    "neural" -> thirdNodes().find { it.id == id }?.label ?: id
+    else -> id
 }
 
 @Composable
@@ -81,8 +91,7 @@ fun AppRoot() {
                 when (currentScreen) {
                     Screen.Splash -> SplashForeground(
                         modifier = Modifier.fillMaxSize(),
-                        onFinishedFadeOut = { screen = Screen.Menu },
-                        onOpenChat = { screen = Screen.Chat }
+                        onFinishedFadeOut = { screen = Screen.Menu }
                     )
                     Screen.Login -> LoginScreen(
                         onLoginSuccess = {
@@ -127,35 +136,11 @@ fun AppRoot() {
                             screen = Screen.NodeDetail(id, label, "neural", Screen.Third)
                         }
                     )
-                    is Screen.Info -> {
-                        val edges = when (currentScreen.returnTo) {
-                            Screen.Menu -> defaultEdges()
-                            Screen.Third -> thirdEdges()
-                            else -> emptyList()
-                        }
-                        val screenType = when (currentScreen.returnTo) {
-                            Screen.Menu -> "classic"
-                            Screen.Third -> "neural"
-                            else -> "classic"
-                        }
-                        InfoScreen(
-                            modifier = Modifier.fillMaxSize(),
-                            id = currentScreen.id,
-                            screenType = screenType,
-                            edges = edges,
-                            initialTab = currentScreen.initialTab,
-                            fromDetail = currentScreen.fromDetail,
-                            onBack = { screen = currentScreen.returnTo }
-                        )
-                    }
                     Screen.Glossary -> GlossaryScreen(
                         modifier = Modifier.fillMaxSize(),
                         onBack = { screen = Screen.Menu }
                     )
-                    Screen.Chat -> ChatScreen(
-                        modifier = Modifier.fillMaxSize(),
-                        onBack = { screen = Screen.Splash }
-                    )
+
                     is Screen.NodeDetail -> {
                         val edges = when (currentScreen.screenType) {
                             "classic" -> defaultEdges()
@@ -163,6 +148,8 @@ fun AppRoot() {
                             else -> emptyList()
                         }
                         val auraColor = getAuraColor(currentScreen.id, currentScreen.screenType)
+                        // returnTo для всех спутниковых экранов — currentScreen (сам NodeDetail),
+                        // а не currentScreen.returnTo — иначе "Назад" уводил бы сразу на общую карту.
                         NodeDetailScreen(
                             modifier = Modifier.fillMaxSize(),
                             nodeId = currentScreen.id,
@@ -171,26 +158,67 @@ fun AppRoot() {
                             edges = edges,
                             auraColor = auraColor,
                             onBack = { screen = currentScreen.returnTo },
-                            onOpenInfo = { id, tab ->
-                                screen = Screen.Info(id, currentScreen, tab, fromDetail = true)
-                            },
-                            onOpenInteractive = { id ->
-                                screen = Screen.Interactive(id, currentScreen.screenType, currentScreen.returnTo)
-                            }
+                            onOpenTheory = { id -> screen = Screen.Theory(id, currentScreen.screenType, currentScreen) },
+                            onOpenTask = { id -> screen = Screen.Task(id, currentScreen.screenType, currentScreen) },
+                            onOpenMath = { id -> screen = Screen.Math(id, currentScreen.screenType, currentScreen) },
+                            onOpenCode = { id -> screen = Screen.Code(id, currentScreen.screenType, currentScreen) },
+                            onOpenInteractive = { id -> screen = Screen.Interactive(id, currentScreen.screenType, currentScreen) },
+                            onOpenResult = { id -> screen = Screen.Result(id, currentScreen.screenType, currentScreen) }
+                        )
+                    }
+
+                    is Screen.Theory -> {
+                        TheoryScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            id = currentScreen.id,
+                            title = labelFor(currentScreen.id, currentScreen.screenType),
+                            onBack = { screen = currentScreen.returnTo },
+                            onNext = { screen = Screen.Task(currentScreen.id, currentScreen.screenType, currentScreen.returnTo) }
+                        )
+                    }
+                    is Screen.Task -> {
+                        TaskScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            id = currentScreen.id,
+                            title = labelFor(currentScreen.id, currentScreen.screenType),
+                            onBack = { screen = currentScreen.returnTo },
+                            onNext = { screen = Screen.Math(currentScreen.id, currentScreen.screenType, currentScreen.returnTo) }
+                        )
+                    }
+                    is Screen.Math -> {
+                        MathScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            id = currentScreen.id,
+                            title = labelFor(currentScreen.id, currentScreen.screenType),
+                            onBack = { screen = currentScreen.returnTo },
+                            onNext = { screen = Screen.Code(currentScreen.id, currentScreen.screenType, currentScreen.returnTo) }
+                        )
+                    }
+                    is Screen.Code -> {
+                        CodeScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            id = currentScreen.id,
+                            title = labelFor(currentScreen.id, currentScreen.screenType),
+                            onBack = { screen = currentScreen.returnTo },
+                            onNext = { screen = Screen.Interactive(currentScreen.id, currentScreen.screenType, currentScreen.returnTo) }
                         )
                     }
                     is Screen.Interactive -> {
-                        val label = when (currentScreen.screenType) {
-                            "classic" -> defaultNodes().find { it.id == currentScreen.id }?.label ?: currentScreen.id
-                            "neural" -> thirdNodes().find { it.id == currentScreen.id }?.label ?: currentScreen.id
-                            else -> currentScreen.id
-                        }
                         InteractiveScreen(
                             modifier = Modifier.fillMaxSize(),
                             onBack = { screen = currentScreen.returnTo },
                             id = currentScreen.id,
                             screenType = currentScreen.screenType,
-                            title = label
+                            title = labelFor(currentScreen.id, currentScreen.screenType),
+                            onNext = { screen = Screen.Result(currentScreen.id, currentScreen.screenType, currentScreen.returnTo) }
+                        )
+                    }
+                    is Screen.Result -> {
+                        ResultScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            id = currentScreen.id,
+                            title = labelFor(currentScreen.id, currentScreen.screenType),
+                            onBack = { screen = currentScreen.returnTo }
                         )
                     }
                 }

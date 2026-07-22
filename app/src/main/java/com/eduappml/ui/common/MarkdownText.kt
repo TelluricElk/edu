@@ -7,14 +7,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.AndroidView
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.latex.JLatexMathPlugin
-import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin
 
+/**
+ * Рендер markdown с формулами.
+ *
+ * ВАЖНО про формулы: используем только БЛОЧНЫЙ синтаксис LaTeX — "$$" на
+ * отдельной строке, формула на следующей строке(ах), закрывающие "$$" на
+ * отдельной строке, и обязательно пустые строки до и после (это отдельный
+ * абзац). Это самая надёжная, штатная форма поддержки JLatexMathPlugin —
+ * не зависит от инлайн-парсера и его настроек. Одиночный "$...$" внутри
+ * обычного предложения НЕ используется намеренно (это более хрупкий путь,
+ * зависящий от тонкой настройки инлайн-парсера) — переменные внутри текста
+ * просто пишутся обычными буквами.
+ *
+ * Раньше здесь была функция normalizeMathDelimiters(), которая схлопывала
+ * пробелы/переносы строк вокруг "$" и "$$". Это ломало ровно то, что нужно
+ * блочному синтаксису (перенос строки сразу после открывающих "$$"), поэтому
+ * функция убрана целиком — markdown передаётся в Markwon как есть.
+ */
 @Composable
 fun MarkdownText(
     markdown: String,
     textColor: Color,
     textSizeSp: Float = 16f,
-    formulaScale: Float = 1.4f
+    formulaScale: Float = 1.5f
 ) {
     AndroidView(
         factory = { context ->
@@ -32,29 +48,14 @@ fun MarkdownText(
         },
         update = { textView ->
             try {
-                val builder = Markwon.builder(textView.context)
-                    .usePlugin(MarkwonInlineParserPlugin.create())
-                    .usePlugin(
-                        JLatexMathPlugin.create(
-                            textView.textSize * formulaScale
-                        )
-                    )
-                val markwon = builder.build()
-                val normalized = normalizeMathDelimiters(markdown)
-                markwon.setMarkdown(textView, normalized)
+                val markwon = Markwon.builder(textView.context)
+                    .usePlugin(JLatexMathPlugin.create(textView.textSize * formulaScale))
+                    .build()
+                markwon.setMarkdown(textView, markdown)
             } catch (e: Exception) {
-                Log.e("MarkdownText", "Render error: ${e.message}")
+                Log.e("MarkdownText", "Render error: ${e.message}", e)
                 textView.text = markdown
             }
         }
     )
-}
-
-private fun normalizeMathDelimiters(src: String): String {
-    var s = src
-    s = s.replace(Regex("""(?<!\$)\$(\s+)(?!\$)"""), """$""")
-    s = s.replace(Regex("""(?<!\$)(\s+)\$(?!\$)"""), """$""")
-    s = s.replace(Regex("""\$\$\s+"""), """$$""")
-    s = s.replace(Regex("""\s+\$\$"""), """$$""")
-    return s
 }

@@ -1,6 +1,5 @@
 package com.eduappml.ui.detail
 
-import android.widget.Toast
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -22,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,10 +41,13 @@ fun NodeDetailScreen(
     edges: List<EdgeSpec>,
     auraColor: Color,
     onBack: () -> Unit,
-    onOpenInfo: (String, Int) -> Unit,
-    onOpenInteractive: (String) -> Unit
+    onOpenTheory: (String) -> Unit,
+    onOpenMath: (String) -> Unit,
+    onOpenCode: (String) -> Unit,
+    onOpenInteractive: (String) -> Unit,
+    onOpenTask: (String) -> Unit,
+    onOpenResult: (String) -> Unit
 ) {
-    val context = LocalContext.current
     val density = LocalDensity.current
 
     var timeSec by remember { mutableStateOf(0f) }
@@ -71,28 +72,34 @@ fun NodeDetailScreen(
 
     data class ChildData(
         val icon: ImageVector,
-        val tab: Int? = null,
         val action: () -> Unit
     )
 
+    // Порядок пузырей выстроен как последовательность обучения по часовой стрелке:
+    // книга    -> Теория (общая информация) — сначала понять, что это такое
+    // "?"      -> Эталонная задача — увидеть конкретный пример
+    // "S"      -> Мат. основа — как это считается формально
+    // "< >"    -> Программная реализация — как это реализовано в коде
+    // лампочка -> Интерактив — попробовать своими руками
+    // алмаз    -> Решение задачи — итог и проверочный тест
     val children = listOf(
+        ChildData(Icons.Filled.MenuBook) {
+            onOpenTheory(nodeId)
+        },
         ChildData(Icons.Filled.QuestionMark) {
-            Toast.makeText(context, "Справка (заглушка)", Toast.LENGTH_SHORT).show()
+            onOpenTask(nodeId)
         },
-        ChildData(Icons.Filled.MenuBook, tab = 0) {
-            onOpenInfo(nodeId, 0)
+        ChildData(Icons.Filled.Functions) {
+            onOpenMath(nodeId)
         },
-        ChildData(Icons.Filled.Functions, tab = 1) {
-            onOpenInfo(nodeId, 1)
-        },
-        ChildData(Icons.Filled.Code, tab = 2) {
-            onOpenInfo(nodeId, 2)
+        ChildData(Icons.Filled.Code) {
+            onOpenCode(nodeId)
         },
         ChildData(Icons.Filled.Lightbulb) {
             onOpenInteractive(nodeId)
         },
         ChildData(Icons.Filled.Diamond) {
-            Toast.makeText(context, "Результат (заглушка)", Toast.LENGTH_SHORT).show()
+            onOpenResult(nodeId)
         }
     )
 

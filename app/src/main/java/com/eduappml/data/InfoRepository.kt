@@ -8,7 +8,8 @@ import java.nio.charset.StandardCharsets
 data class InfoContent(
     val general: String?,
     val math: String?,
-    val impl: String?
+    val impl: String?,
+    val task: String? = null
 )
 
 object InfoRepository {
@@ -71,6 +72,23 @@ object InfoRepository {
         val general = loadSection(assets, id, "general", preferredLang)
         val math = loadSection(assets, id, "math", preferredLang)
         val impl = loadSection(assets, id, "impl", preferredLang)
-        return InfoContent(general, math, impl)
+        val task = loadSection(assets, id, "task", preferredLang)
+        return InfoContent(general, math, impl, task)
     }
+
+    /** Раздел "Теория" (пузырь-книга). */
+    fun loadGeneral(assets: AssetManager, id: String, preferredLang: String? = "ru"): String? =
+        loadSection(assets, id, "general", preferredLang)
+
+    /** Раздел "Мат. основа" (пузырь "S"). */
+    fun loadMath(assets: AssetManager, id: String, preferredLang: String? = "ru"): String? =
+        loadSection(assets, id, "math", preferredLang)
+
+    /** Раздел "Программная реализация" (пузырь "< >"). */
+    fun loadImpl(assets: AssetManager, id: String, preferredLang: String? = "ru"): String? =
+        loadSection(assets, id, "impl", preferredLang)
+
+    /** Раздел "Эталонная задача" (пузырь "?"). */
+    fun loadTask(assets: AssetManager, id: String, preferredLang: String? = "ru"): String? =
+        loadSection(assets, id, "task", preferredLang)
 }
