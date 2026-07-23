@@ -52,7 +52,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun SplashForeground(
     modifier: Modifier = Modifier,
-    onFinishedFadeOut: () -> Unit = {}
+    onFinishedFadeOut: () -> Unit = {},
+    onOpenChat: () -> Unit = {}
 ) {
     val contentAlpha = remember { Animatable(1f) }
     var isExiting by remember { mutableStateOf(false) }
@@ -132,6 +133,9 @@ fun SplashForeground(
                         }
                     )
                 }
+                ChatButton(
+                    onClick = onOpenChat
+                )
             }
         }
 
@@ -154,9 +158,6 @@ fun SplashForeground(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                // ПРОВЕРЬТЕ ЭТУ СТРОКУ: восстановлено по границе фрагментов поиска
-                // как "Educational App." — если в оригинале было больше текста,
-                // верните свою формулировку, остальной код это не затронет.
                 text = "Educational App.",
                 textAlign = TextAlign.Center,
                 fontSize = 16.sp,
@@ -250,6 +251,28 @@ private fun LogoutButton(
     ) {
         Text(
             text = "🚪",
+            fontSize = 22.sp,
+            color = Color.White
+        )
+    }
+}
+
+@Composable
+private fun ChatButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(Color.Black.copy(alpha = 0.4f))
+            .clickable(onClick = onClick)
+            .padding(8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "💬",
             fontSize = 22.sp,
             color = Color.White
         )
