@@ -8,9 +8,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.ae.AeResult
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.dt.DtResult
 import com.eduappml.ui.fc.FcResult
+import com.eduappml.ui.gan.GanResult
 import com.eduappml.ui.gb.GbResult
 import com.eduappml.ui.km.KmResult
 import com.eduappml.ui.knn.KnnLab
@@ -49,6 +51,8 @@ fun ResultScreen(
         "fc" -> FcResult(modifier = modifier, title = title, onBack = onBack)
         "som" -> SomResult(modifier = modifier, title = title, onBack = onBack)
         "rl" -> RlResult(modifier = modifier, title = title, onBack = onBack)
+        "ae" -> AeResult(modifier = modifier, title = title, onBack = onBack)
+        "gan" -> GanResult(modifier = modifier, title = title, onBack = onBack)
         else -> ComingSoonResult(modifier = modifier, title = title, id = id, onBack = onBack)
     }
 }

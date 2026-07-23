@@ -21,9 +21,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.ae.AeInteractive
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.dt.DtInteractive
 import com.eduappml.ui.fc.FcInteractive
+import com.eduappml.ui.gan.GanInteractive
 import com.eduappml.ui.gb.GbInteractive
 import com.eduappml.ui.km.KmInteractive
 import com.eduappml.ui.knn.KnnLab
@@ -66,6 +68,8 @@ fun InteractiveScreen(
         "fc" -> FcInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
         "som" -> SomInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
         "rl" -> RlInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
+        "ae" -> AeInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
+        "gan" -> GanInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
         else -> ComingSoonInteractive(modifier = modifier, title = title, id = id, onBack = onBack, onNext = onNext)
     }
 }
