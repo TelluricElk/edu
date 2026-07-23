@@ -12,7 +12,6 @@ import com.eduappml.managers.SessionManager
 import com.eduappml.ui.auth.LoginScreen
 import com.eduappml.ui.auth.RegisterScreen
 import com.eduappml.ui.auth.VerificationScreen
-import com.eduappml.ui.chat.ChatScreen
 import com.eduappml.ui.code.CodeScreen
 import com.eduappml.ui.common.UnifiedBackground
 import com.eduappml.ui.detail.NodeDetailScreen
@@ -44,7 +43,6 @@ private sealed class Screen {
     data object Menu   : Screen()
     data object Third  : Screen()
     data object Glossary : Screen()
-    data object Chat : Screen()
 
     data class NodeDetail(
         val id: String,
@@ -93,8 +91,7 @@ fun AppRoot() {
                 when (currentScreen) {
                     Screen.Splash -> SplashForeground(
                         modifier = Modifier.fillMaxSize(),
-                        onFinishedFadeOut = { screen = Screen.Menu },
-                        onOpenChat = { screen = Screen.Chat }
+                        onFinishedFadeOut = { screen = Screen.Menu }
                     )
                     Screen.Login -> LoginScreen(
                         onLoginSuccess = {
@@ -142,10 +139,6 @@ fun AppRoot() {
                     Screen.Glossary -> GlossaryScreen(
                         modifier = Modifier.fillMaxSize(),
                         onBack = { screen = Screen.Menu }
-                    )
-                    Screen.Chat -> ChatScreen(
-                        modifier = Modifier.fillMaxSize(),
-                        onBack = { screen = Screen.Splash }
                     )
 
                     is Screen.NodeDetail -> {

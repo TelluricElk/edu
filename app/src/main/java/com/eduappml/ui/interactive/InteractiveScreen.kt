@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.dt.DtInteractive
+import com.eduappml.ui.fc.FcInteractive
 import com.eduappml.ui.gb.GbInteractive
 import com.eduappml.ui.km.KmInteractive
 import com.eduappml.ui.knn.KnnLab
@@ -32,6 +33,8 @@ import com.eduappml.ui.logr.LogrInteractive
 import com.eduappml.ui.lr.LrInteractive
 import com.eduappml.ui.nb.NbInteractive
 import com.eduappml.ui.rf.RfInteractive
+import com.eduappml.ui.rl.RlInteractive
+import com.eduappml.ui.som.SomInteractive
 import com.eduappml.ui.svm.SvmInteractive
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
@@ -60,6 +63,9 @@ fun InteractiveScreen(
         "rf" -> RfInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
         "gb" -> GbInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
         "km" -> KmInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
+        "fc" -> FcInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
+        "som" -> SomInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
+        "rl" -> RlInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
         else -> ComingSoonInteractive(modifier = modifier, title = title, id = id, onBack = onBack, onNext = onNext)
     }
 }

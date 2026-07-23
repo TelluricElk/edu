@@ -62,4 +62,10 @@ interface AuthApi {
     suspend fun verifyCode(
         @Body request: VerifyCodeRequest
     ): Response<VerifyCodeResponse>
+
+    // === Edge Function для чата с GigaChat ===
+    @POST("functions/v1/chat")
+    suspend fun sendChatMessage(
+        @Body request: ChatRequest
+    ): Response<ChatResponse>
 }

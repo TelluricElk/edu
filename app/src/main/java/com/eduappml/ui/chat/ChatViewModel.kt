@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.eduappml.data.models.ChatHistoryItem
 import com.eduappml.data.models.ChatRequest
 import com.eduappml.data.models.ChatRole
-import com.eduappml.network.ChatApiClient
+import com.eduappml.network.ApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -56,7 +56,7 @@ class ChatViewModel(private val context: Context) : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val response = ChatApiClient.chatApi.sendMessage(
+                val response = ApiClient.authApi.sendChatMessage(
                     ChatRequest(message = trimmed, history = history)
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -77,7 +77,7 @@ class ChatViewModel(private val context: Context) : ViewModel() {
             } catch (e: IOException) {
                 Log.e(TAG, "Network error: ${e.message}", e)
                 _messages.value = _messages.value + ChatUiMessage(
-                    text = "Не удалось подключиться к серверу чата. Проверьте адрес сервера и подключение к интернету.",
+                    text = "Не удалось подключиться к серверу чата. Проверьте подключение к интернету.",
                     isUser = false,
                     isError = true
                 )
@@ -89,14 +89,9 @@ class ChatViewModel(private val context: Context) : ViewModel() {
                     isError = true
                 )
             } catch (t: Throwable) {
-                // Ловим ВСЁ, включая Error (например ExceptionInInitializerError,
-                // если ChatApiClient не смог инициализироваться из-за некорректного
-                // BASE_URL) — чтобы это никогда не роняло приложение целиком,
-                // а показывалось как обычное сообщение об ошибке в чате.
                 Log.e(TAG, "Unexpected error/throwable: ${t.message}", t)
                 _messages.value = _messages.value + ChatUiMessage(
-                    text = "Произошла непредвиденная ошибка при обращении к серверу чата. " +
-                            "Проверьте настройки сервера в ChatApiClient.kt (BASE_URL).",
+                    text = "Произошла непредвиденная ошибка при обращении к серверу чата.",
                     isUser = false,
                     isError = true
                 )

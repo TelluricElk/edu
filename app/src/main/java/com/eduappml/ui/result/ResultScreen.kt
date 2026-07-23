@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.dt.DtResult
+import com.eduappml.ui.fc.FcResult
 import com.eduappml.ui.gb.GbResult
 import com.eduappml.ui.km.KmResult
 import com.eduappml.ui.knn.KnnLab
@@ -18,6 +19,8 @@ import com.eduappml.ui.logr.LogrResult
 import com.eduappml.ui.lr.LrResult
 import com.eduappml.ui.nb.NbResult
 import com.eduappml.ui.rf.RfResult
+import com.eduappml.ui.rl.RlResult
+import com.eduappml.ui.som.SomResult
 import com.eduappml.ui.svm.SvmResult
 import kotlin.math.roundToInt
 
@@ -43,6 +46,9 @@ fun ResultScreen(
         "rf" -> RfResult(modifier = modifier, title = title, onBack = onBack)
         "gb" -> GbResult(modifier = modifier, title = title, onBack = onBack)
         "km" -> KmResult(modifier = modifier, title = title, onBack = onBack)
+        "fc" -> FcResult(modifier = modifier, title = title, onBack = onBack)
+        "som" -> SomResult(modifier = modifier, title = title, onBack = onBack)
+        "rl" -> RlResult(modifier = modifier, title = title, onBack = onBack)
         else -> ComingSoonResult(modifier = modifier, title = title, id = id, onBack = onBack)
     }
 }
