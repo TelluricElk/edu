@@ -3,6 +3,7 @@ package com.eduappml.ui.interactive
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eduappml.ui.ae.AeInteractive
+import com.eduappml.ui.cnn.CnnInteractive
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.dt.DtInteractive
 import com.eduappml.ui.fc.FcInteractive
@@ -36,6 +38,7 @@ import com.eduappml.ui.lr.LrInteractive
 import com.eduappml.ui.nb.NbInteractive
 import com.eduappml.ui.rf.RfInteractive
 import com.eduappml.ui.rl.RlInteractive
+import com.eduappml.ui.rnn.RnnInteractive
 import com.eduappml.ui.som.SomInteractive
 import com.eduappml.ui.svm.SvmInteractive
 import kotlinx.coroutines.delay
@@ -70,6 +73,8 @@ fun InteractiveScreen(
         "rl" -> RlInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
         "ae" -> AeInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
         "gan" -> GanInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
+        "cnn" -> CnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
+        "rnn" -> RnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
         else -> ComingSoonInteractive(modifier = modifier, title = title, id = id, onBack = onBack, onNext = onNext)
     }
 }
@@ -281,7 +286,7 @@ private fun SegmentedRow(
                     .clip(RoundedCornerShape(12.dp))
                     .background(if (selected) Color.White.copy(alpha = 0.22f) else Color.Transparent)
                     .padding(vertical = 10.dp)
-                    .pointerInput(index) { detectTapGestures { onSelected(index) } },
+                    .clickable { onSelected(index) },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
