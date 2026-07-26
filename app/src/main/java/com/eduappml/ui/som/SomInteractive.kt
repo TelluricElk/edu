@@ -16,7 +16,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eduappml.ui.common.BottomPillButton
 import com.eduappml.ui.common.LessonScaffold
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 @Composable
@@ -35,7 +37,7 @@ fun SomInteractive(
     var map by remember { mutableStateOf(SomLab.trainUpTo(step, seed)) }
     LaunchedEffect(step, seed) {
         delay(80)
-        map = SomLab.trainUpTo(step, seed)
+        map = withContext(Dispatchers.Default) { SomLab.trainUpTo(step, seed) }
     }
 
     val smoothness = remember(map) { SomLab.averageNeighborDistance(map) }

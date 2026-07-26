@@ -15,7 +15,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eduappml.ui.common.LessonScaffold
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -36,7 +38,7 @@ fun FcInteractive(
     var result by remember { mutableStateOf(FcLab.train(hiddenSize, learningRate, epochs)) }
     LaunchedEffect(hiddenSize, learningRate, epochs) {
         delay(120)
-        result = FcLab.train(hiddenSize, learningRate, epochs)
+        result = withContext(Dispatchers.Default) { FcLab.train(hiddenSize, learningRate, epochs) }
     }
 
     val testAcc = remember(result) { FcLab.accuracy(result.network, FcLab.testSet) }

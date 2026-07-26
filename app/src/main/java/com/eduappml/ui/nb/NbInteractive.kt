@@ -79,7 +79,12 @@ fun NbInteractive(
                 "Пляж: ${"%.0f".format(beachProb)}%   Дом: ${"%.0f".format(100 - beachProb)}%",
                 color = textColor, fontSize = 16.sp, fontWeight = FontWeight.Bold
             )
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = nbInsight(beachProb),
+                color = textColor.copy(alpha = 0.75f), fontSize = 13.sp, lineHeight = 18.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
         }
 
         Text(
@@ -125,6 +130,16 @@ fun NbInteractive(
                 )
             }
         }
+    }
+}
+
+/** Живое текстовое пояснение, привязанное к точке, которую пользователь поставил на графике. */
+private fun nbInsight(beachProbPercent: Float): String {
+    val confidence = kotlin.math.abs(beachProbPercent - 50f)
+    return when {
+        confidence < 10f -> "Эта точка лежит в зоне, где колоколообразные кривые обоих классов почти одинаково высоки — модель здесь совсем не уверена, предсказание близко к угадыванию."
+        confidence < 30f -> "Здесь одна кривая уже заметно выше другой, но не радикально — умеренная уверенность в предсказанном классе."
+        else -> "Для этой точки одна из кривых намного выше другой хотя бы по одному признаку — модель уверена в своём предсказании."
     }
 }
 

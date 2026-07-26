@@ -16,7 +16,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eduappml.ui.common.LessonScaffold
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 @Composable
@@ -36,7 +38,7 @@ fun RlInteractive(
     var result by remember { mutableStateOf(RlLab.train(episodes, alpha, epsilon)) }
     LaunchedEffect(episodes, alpha, epsilon) {
         delay(120)
-        result = RlLab.train(episodes, alpha, epsilon)
+        result = withContext(Dispatchers.Default) { RlLab.train(episodes, alpha, epsilon) }
     }
 
     val path = remember(result) { RlLab.greedyPath(result.q) }

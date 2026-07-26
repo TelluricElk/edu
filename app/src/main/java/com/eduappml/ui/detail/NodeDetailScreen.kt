@@ -18,7 +18,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
@@ -107,8 +106,15 @@ fun NodeDetailScreen(
     val childSize = 56.dp
     val orbitRadius = 140.dp
 
-    val childPositions = children.mapIndexed { index, _ ->
-        val angle = (2 * PI / children.size) * index - PI / 2
+    // ЕДИНЫЙ источник углов — считается один раз и используется и для линий на Canvas,
+    // и для расположения самих пузырей. Раньше угол вычислялся отдельно в двух местах
+    // (здесь и внутри Canvas) — математически идентично, но два независимых вычисления
+    // одной и той же величины — плохая практика, усложняющая поиск расхождений.
+    val childAngles = children.indices.map { index ->
+        (2 * PI / children.size) * index - PI / 2
+    }
+
+    val childPositions = childAngles.map { angle ->
         val x = orbitRadius * cos(angle).toFloat()
         val y = orbitRadius * sin(angle).toFloat()
         Pair(x, y)
@@ -127,19 +133,26 @@ fun NodeDetailScreen(
             val cy = size.height / 2
             val radiusPx = with(density) { orbitRadius.toPx() }
 
-            children.forEachIndexed { index, _ ->
-                val angle = (2 * PI / children.size) * index - PI / 2
+            childAngles.forEachIndexed { index, angle ->
                 val endX = cx + radiusPx * cos(angle)
                 val endY = cy + radiusPx * sin(angle)
                 val start = Offset(cx, cy)
                 val end = Offset(endX.toFloat(), endY.toFloat())
 
+                // cornerPathEffect убран: он скругляет углы МНОГОточечного пути,
+                // а здесь простая линия из двух точек — скруглять там нечего.
+                // Толщина увеличена (2f -> 4f) и альфа поднята (0.20 -> 0.32):
+                // на строго вертикальных/горизонтальных линиях (Теория сверху,
+                // Код снизу — единственные два таких случая в этой раскладке)
+                // тонкая полупрозрачная линия могла субпиксельно "размазываться"
+                // антиалиасингом ровно по границе пиксельной сетки и становиться
+                // почти невидимой на пёстром фоне — с бóльшим запасом по толщине
+                // и яркости такого свести к нулю уже не получится.
                 drawLine(
-                    color = Color.White.copy(alpha = 0.20f),
+                    color = Color.White.copy(alpha = 0.32f),
                     start = start,
                     end = end,
-                    strokeWidth = 2f,
-                    pathEffect = PathEffect.cornerPathEffect(36f)
+                    strokeWidth = 4f
                 )
 
                 val speedPxPerSec = 150f

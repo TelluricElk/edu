@@ -25,10 +25,12 @@ import androidx.compose.ui.unit.sp
 import com.eduappml.ui.ae.AeInteractive
 import com.eduappml.ui.cnn.CnnInteractive
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.dm.DmInteractive
 import com.eduappml.ui.dt.DtInteractive
 import com.eduappml.ui.fc.FcInteractive
 import com.eduappml.ui.gan.GanInteractive
 import com.eduappml.ui.gb.GbInteractive
+import com.eduappml.ui.gnn.GnnInteractive
 import com.eduappml.ui.km.KmInteractive
 import com.eduappml.ui.knn.KnnLab
 import com.eduappml.ui.knn.KnnMetric
@@ -41,6 +43,7 @@ import com.eduappml.ui.rl.RlInteractive
 import com.eduappml.ui.rnn.RnnInteractive
 import com.eduappml.ui.som.SomInteractive
 import com.eduappml.ui.svm.SvmInteractive
+import com.eduappml.ui.tr.TrInteractive
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -75,6 +78,9 @@ fun InteractiveScreen(
         "gan" -> GanInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
         "cnn" -> CnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
         "rnn" -> RnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
+        "gnn" -> GnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
+        "tr" -> TrInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
+        "dm" -> DmInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
         else -> ComingSoonInteractive(modifier = modifier, title = title, id = id, onBack = onBack, onNext = onNext)
     }
 }

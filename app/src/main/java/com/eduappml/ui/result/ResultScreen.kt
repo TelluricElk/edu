@@ -11,10 +11,12 @@ import androidx.compose.ui.unit.sp
 import com.eduappml.ui.ae.AeResult
 import com.eduappml.ui.cnn.CnnResult
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.dm.DmResult
 import com.eduappml.ui.dt.DtResult
 import com.eduappml.ui.fc.FcResult
 import com.eduappml.ui.gan.GanResult
 import com.eduappml.ui.gb.GbResult
+import com.eduappml.ui.gnn.GnnResult
 import com.eduappml.ui.km.KmResult
 import com.eduappml.ui.knn.KnnLab
 import com.eduappml.ui.common.QuizSection
@@ -26,6 +28,7 @@ import com.eduappml.ui.rl.RlResult
 import com.eduappml.ui.rnn.RnnResult
 import com.eduappml.ui.som.SomResult
 import com.eduappml.ui.svm.SvmResult
+import com.eduappml.ui.tr.TrResult
 import kotlin.math.roundToInt
 
 /**
@@ -57,6 +60,9 @@ fun ResultScreen(
         "gan" -> GanResult(modifier = modifier, title = title, onBack = onBack)
         "cnn" -> CnnResult(modifier = modifier, title = title, onBack = onBack)
         "rnn" -> RnnResult(modifier = modifier, title = title, onBack = onBack)
+        "gnn" -> GnnResult(modifier = modifier, title = title, onBack = onBack)
+        "tr" -> TrResult(modifier = modifier, title = title, onBack = onBack)
+        "dm" -> DmResult(modifier = modifier, title = title, onBack = onBack)
         else -> ComingSoonResult(modifier = modifier, title = title, id = id, onBack = onBack)
     }
 }

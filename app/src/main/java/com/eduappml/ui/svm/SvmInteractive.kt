@@ -17,7 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eduappml.ui.common.LessonScaffold
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 @Composable
@@ -37,7 +39,7 @@ fun SvmInteractive(
     var model by remember { mutableStateOf(SvmLab.train(c, kernel, gamma, 600)) }
     LaunchedEffect(c, kernel, gamma) {
         delay(150)
-        model = SvmLab.train(c, kernel, gamma, 600)
+        model = withContext(Dispatchers.Default) { SvmLab.train(c, kernel, gamma, 600) }
     }
 
     val accuracy = remember(model) { SvmLab.accuracy(model, SvmLab.testSet) }

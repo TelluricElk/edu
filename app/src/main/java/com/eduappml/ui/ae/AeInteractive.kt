@@ -17,7 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eduappml.ui.common.LessonScaffold
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 @Composable
@@ -37,7 +39,7 @@ fun AeInteractive(
     var ae by remember { mutableStateOf(AeLab.train(bottleneck, learningRate, epochs)) }
     LaunchedEffect(bottleneck, learningRate, epochs) {
         delay(120)
-        ae = AeLab.train(bottleneck, learningRate, epochs)
+        ae = withContext(Dispatchers.Default) { AeLab.train(bottleneck, learningRate, epochs) }
     }
 
     val testMse = remember(ae) { AeLab.mse(ae, AeLab.testSet) }
