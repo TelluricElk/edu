@@ -114,7 +114,10 @@ private fun MainThirdContent(
             }
         )
 
-        // Кнопки "Назад" и "?"
+        // Кнопки "Назад" и "?" — раскладка приведена в соответствие с MenuScreen.kt
+        // (компактная центрированная группа вместо fillMaxWidth+SpaceBetween,
+        // которая разносила кнопки по краям экрана и "съезжала" при переходе
+        // между разделами "Классика" и "Нейросети").
         AnimatedVisibility(
             visible = true,
             enter = fadeIn(animationSpec = tween(2500)),
@@ -125,42 +128,33 @@ private fun MainThirdContent(
                 contentAlignment = Alignment.BottomCenter
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp)
-                        .padding(bottom = 32.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.padding(bottom = 32.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     BottomPillButton(
                         text = "Назад",
                         onClick = onBack,
-                        modifier = Modifier
-                            .weight(1f, fill = false)
-                            .onGloballyPositioned { coords ->
-                                val rect = coords.boundsInParent()
-                                val center = Offset(rect.center.x, rect.center.y)
-                                val halfDiag = 0.5f * hypot(rect.width, rect.height)
-                                val radius = halfDiag * 1.2f + extraPadPx
-                                backAvoid = AvoidCircle(center, radiusPx = radius, strength = 1.2f)
-                            }
+                        modifier = Modifier.onGloballyPositioned { coords ->
+                            val rect = coords.boundsInParent()
+                            val center = Offset(rect.center.x, rect.center.y)
+                            val halfDiag = 0.5f * hypot(rect.width, rect.height)
+                            val radius = halfDiag * 1.2f + extraPadPx
+                            backAvoid = AvoidCircle(center, radiusPx = radius, strength = 1.2f)
+                        }
                     )
 
                     BottomPillButton(
                         text = "?",
                         onClick = onOpenGlossary,
-                        modifier = Modifier
-                            .weight(1f, fill = false)
-                            .onGloballyPositioned { coords ->
-                                val rect = coords.boundsInParent()
-                                val center = Offset(rect.center.x, rect.center.y)
-                                val halfDiag = 0.5f * hypot(rect.width, rect.height)
-                                val radius = halfDiag * 1.2f + extraPadPx
-                                glossaryAvoid = AvoidCircle(center, radiusPx = radius, strength = 1.2f)
-                            }
+                        modifier = Modifier.onGloballyPositioned { coords ->
+                            val rect = coords.boundsInParent()
+                            val center = Offset(rect.center.x, rect.center.y)
+                            val halfDiag = 0.5f * hypot(rect.width, rect.height)
+                            val radius = halfDiag * 1.2f + extraPadPx
+                            glossaryAvoid = AvoidCircle(center, radiusPx = radius, strength = 1.2f)
+                        }
                     )
-
-                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
