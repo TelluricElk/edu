@@ -15,7 +15,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -26,10 +28,12 @@ fun RlInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFF00B4D8)
+    val topicTitle = title ?: "Обучение с подкреплением"
 
     var episodes by remember { mutableIntStateOf(50) }
     var alpha by remember { mutableFloatStateOf(0.3f) }
@@ -125,6 +129,16 @@ fun RlInteractive(
                     fontSize = 13.sp,
                     lineHeight = 18.sp
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "число эпизодов = $episodes, α = ${"%.2f".format(alpha)}, ε = ${"%.2f".format(epsilon)}",
+                            "среднее число шагов за последние 10 эпизодов ${"%.1f".format(recentAvg)}, цель ${if (reachedGoal) "достигнута" else "пока не достигнута"}"
+                        )
+                    )
+                })
             }
         }
     }

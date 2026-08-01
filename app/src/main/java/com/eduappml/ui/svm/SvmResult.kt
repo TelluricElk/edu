@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
@@ -58,7 +59,7 @@ private val svmQuiz = listOf(
 )
 
 @Composable
-fun SvmResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun SvmResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFFB5179E)
 
@@ -83,6 +84,15 @@ fun SvmResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit)
                     "Точность на контрольной выборке: ${(accuracy * 100).roundToInt()}%, опорных векторов: $svCount из ${SvmLab.trainSet.size}",
                     color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        "Объясни, пожалуйста, простыми словами, почему получился именно такой результат в теме «${title ?: "SVM"}» (Решение задачи).\n\n" +
+                        "Параметры: C = 1, ядро — линейное.\n" +
+                        "Точность на контрольной выборке: ${(accuracy * 100).roundToInt()}%, опорных векторов: $svCount из ${SvmLab.trainSet.size}\n\n" +
+                        "Что означают эти числа и почему получились именно такими?"
+                    )
+                })
             }
         }
 

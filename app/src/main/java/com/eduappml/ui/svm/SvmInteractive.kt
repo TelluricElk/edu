@@ -16,7 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -27,10 +29,12 @@ fun SvmInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFFB5179E)
+    val topicTitle = title ?: "SVM"
 
     var c by remember { mutableFloatStateOf(1f) }
     var kernel by remember { mutableStateOf(SvmKernel.LINEAR) }
@@ -122,6 +126,17 @@ fun SvmInteractive(
                     fontSize = 13.sp,
                     lineHeight = 18.sp
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    val kernelParam = if (kernel == SvmKernel.RBF) ", gamma = ${"%.2f".format(gamma)}" else ""
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "C = ${"%.2f".format(c)}, ядро = ${kernel.label}$kernelParam",
+                            "точность на контрольной выборке ${(accuracy * 100).roundToInt()}%, опорных векторов $svCount из ${SvmLab.trainSet.size}"
+                        )
+                    )
+                })
             }
         }
     }

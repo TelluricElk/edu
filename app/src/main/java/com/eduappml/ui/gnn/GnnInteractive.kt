@@ -15,7 +15,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -28,10 +30,12 @@ fun GnnInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFFB5179E)
+    val topicTitle = title ?: "Графовая сеть"
 
     var numLayers by remember { mutableIntStateOf(1) }
     var learningRate by remember { mutableFloatStateOf(0.03f) }
@@ -100,6 +104,16 @@ fun GnnInteractive(
 
                 Spacer(Modifier.height(8.dp))
                 Text(text = gnnInsight(numLayers, accuracy), color = textColor.copy(alpha = 0.75f), fontSize = 13.sp, lineHeight = 18.sp)
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "число раундов обмена сообщениями = $numLayers, скорость обучения = ${"%.3f".format(learningRate)}, эпох = $epochs",
+                            "точность классификации сообществ ${(accuracy * 100).roundToInt()}%"
+                        )
+                    )
+                })
             }
         }
     }

@@ -16,7 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -27,10 +29,12 @@ fun AeInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFFFF914D)
+    val topicTitle = title ?: "Автокодировщик"
 
     var bottleneck by remember { mutableIntStateOf(1) }
     var learningRate by remember { mutableFloatStateOf(0.15f) }
@@ -117,6 +121,16 @@ fun AeInteractive(
                     fontSize = 13.sp,
                     lineHeight = 18.sp
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "размер узкого горлышка = $bottleneck, скорость обучения = ${"%.2f".format(learningRate)}, эпох = $epochs",
+                            "ошибка реконструкции (MSE) на контрольной выборке ${"%.4f".format(testMse)}"
+                        )
+                    )
+                })
             }
         }
     }

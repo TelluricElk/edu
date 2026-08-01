@@ -24,7 +24,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eduappml.ui.ae.AeInteractive
 import com.eduappml.ui.cnn.CnnInteractive
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import com.eduappml.ui.dm.DmInteractive
 import com.eduappml.ui.dt.DtInteractive
 import com.eduappml.ui.fc.FcInteractive
@@ -51,6 +53,10 @@ import kotlin.math.roundToInt
  * Экран "Интерактив" (пузырь-лампочка). Параметры обучения условные —
  * реального обучения модели на устройстве не происходит, всё считается
  * "по требованию" на маленьком фиксированном датасете (см. *Lab.kt каждой темы).
+ *
+ * [onOpenChat] — колбэк для кнопки "объяснить" рядом с текущим результатом:
+ * пользователь подвигал ползунки, получил результат и может спросить у
+ * Edu.AI, почему именно так — см. аналогичный параметр в ResultScreen.kt.
  */
 @Composable
 fun InteractiveScreen(
@@ -59,28 +65,29 @@ fun InteractiveScreen(
     id: String,
     screenType: String,
     title: String? = null,
-    onNext: () -> Unit = {}
+    onNext: () -> Unit = {},
+    onOpenChat: (String) -> Unit = {}
 ) {
     when (id) {
-        "knn" -> KnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "lr" -> LrInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "logr" -> LogrInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "svm" -> SvmInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "dt" -> DtInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "nb" -> NbInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "rf" -> RfInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "gb" -> GbInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "km" -> KmInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "fc" -> FcInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "som" -> SomInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "rl" -> RlInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "ae" -> AeInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "gan" -> GanInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "cnn" -> CnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "rnn" -> RnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "gnn" -> GnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "tr" -> TrInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
-        "dm" -> DmInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext)
+        "knn" -> KnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "lr" -> LrInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "logr" -> LogrInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "svm" -> SvmInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "dt" -> DtInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "nb" -> NbInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "rf" -> RfInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "gb" -> GbInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "km" -> KmInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "fc" -> FcInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "som" -> SomInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "rl" -> RlInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "ae" -> AeInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "gan" -> GanInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "cnn" -> CnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "rnn" -> RnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "gnn" -> GnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "tr" -> TrInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "dm" -> DmInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
         else -> ComingSoonInteractive(modifier = modifier, title = title, id = id, onBack = onBack, onNext = onNext)
     }
 }
@@ -121,9 +128,11 @@ private fun KnnInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
+    val topicTitle = title ?: "k-NN"
 
     var k by remember { mutableIntStateOf(5) }
     var metric by remember { mutableStateOf(KnnMetric.EUCLIDEAN) }
@@ -267,6 +276,16 @@ private fun KnnInteractive(
                     fontSize = 13.sp,
                     modifier = Modifier.padding(top = 4.dp)
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = Color(0xFF00C2A8), onClick = {
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "k = $k, метрика — ${metric.label}, взвешивание — ${weighting.label}",
+                            "точность на контрольной выборке ${(accuracy * 100).roundToInt()}%"
+                        )
+                    )
+                })
             }
         }
     }

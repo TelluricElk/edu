@@ -14,7 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -28,10 +30,12 @@ fun DmInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFF9D4EDD)
+    val topicTitle = title ?: "Диффузионная модель"
 
     // --- Прямой процесс ---
     var noiseSigma by remember { mutableFloatStateOf(1f) }
@@ -102,6 +106,16 @@ fun DmInteractive(
                 Text("Доля точек, дошедших до одного из двух облаков: ${(convergence * 100).roundToInt()}%", color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(8.dp))
                 Text(text = dmInsight(reverseSteps, convergence), color = textColor.copy(alpha = 0.75f), fontSize = 13.sp, lineHeight = 18.sp)
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "число шагов денойзинга = $reverseSteps, точная score-функция (без обучения)",
+                            "доля точек, дошедших до одного из двух облаков ${(convergence * 100).roundToInt()}%"
+                        )
+                    )
+                })
             }
         }
     }

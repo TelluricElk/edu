@@ -8,10 +8,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
 import com.eduappml.ui.common.QuizSection
+import com.eduappml.ui.common.buildResultChatPrompt
 import kotlin.math.roundToInt
 
 private val rnnQuiz = listOf(
@@ -58,9 +60,10 @@ private val rnnQuiz = listOf(
 )
 
 @Composable
-fun RnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun RnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFF6BCB77)
+    val topicTitle = title ?: "Рекуррентная сеть"
 
     val shortNet = remember { RnnLab.train(length = 3, lr = 0.15f, epochs = 300) }
     val shortAcc = remember { RnnLab.accuracy(shortNet, RnnLab.testSet(3)) }
@@ -87,6 +90,16 @@ fun RnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit)
                     "Разница — не случайность и не ошибка настройки, а прямое следствие затухающего градиента на длинных последовательностях.",
                     color = textColor.copy(alpha = 0.7f), fontSize = 12.5.sp
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildResultChatPrompt(
+                            topicTitle,
+                            "300 эпох, learning rate 0,15, длины последовательности 3 и 8",
+                            "точность на длине 3 — ${(shortAcc * 100).roundToInt()}%, на длине 8 — ${(longAcc * 100).roundToInt()}%"
+                        )
+                    )
+                })
             }
         }
 

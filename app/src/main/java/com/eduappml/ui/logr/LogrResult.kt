@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
@@ -57,7 +58,7 @@ private val logrQuiz = listOf(
 )
 
 @Composable
-fun LogrResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun LogrResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFFFFD93D)
 
@@ -81,6 +82,15 @@ fun LogrResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit
                     "Accuracy на контрольной выборке: ${"%.0f".format(cm.accuracy * 100)}%, Precision = ${"%.2f".format(cm.precision)}, Recall = ${"%.2f".format(cm.recall)}",
                     color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        "Объясни, пожалуйста, простыми словами, почему получился именно такой результат в теме «${title ?: "Логистическая регрессия"}» (Решение задачи).\n\n" +
+                        "Порог 0,5, 300 эпох обучения.\n" +
+                        "Accuracy на контрольной выборке: ${"%.0f".format(cm.accuracy * 100)}%, Precision = ${"%.2f".format(cm.precision)}, Recall = ${"%.2f".format(cm.recall)}\n\n" +
+                        "Что означают эти числа и почему получились именно такими?"
+                    )
+                })
             }
         }
 

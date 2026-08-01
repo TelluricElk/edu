@@ -8,10 +8,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
 import com.eduappml.ui.common.QuizSection
+import com.eduappml.ui.common.buildResultChatPrompt
 import kotlin.math.roundToInt
 
 private val gnnQuiz = listOf(
@@ -58,9 +60,10 @@ private val gnnQuiz = listOf(
 )
 
 @Composable
-fun GnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun GnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFFB5179E)
+    val topicTitle = title ?: "Графовая сеть"
 
     val model = remember { GnnLab.train(numLayers = 2, hidden = 4, lr = 0.03f, epochs = 250) }
     val accuracy = remember { GnnLab.accuracy(model) }
@@ -87,6 +90,16 @@ fun GnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit)
                     "Два раунда — тот самый баланс: достаточно, чтобы увидеть структуру сообществ, но ещё не настолько много, чтобы всё «размыть».",
                     color = textColor.copy(alpha = 0.7f), fontSize = 12.5.sp
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildResultChatPrompt(
+                            topicTitle,
+                            "2 раунда обмена сообщениями, скорость обучения 0,03, 250 эпох",
+                            "точность классификации сообществ ${(accuracy * 100).roundToInt()}%"
+                        )
+                    )
+                })
             }
         }
 

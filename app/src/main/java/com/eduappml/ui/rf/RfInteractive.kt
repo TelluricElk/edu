@@ -14,7 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import com.eduappml.ui.dt.CreditPoint
 import com.eduappml.ui.dt.DtLab
 import kotlinx.coroutines.delay
@@ -26,10 +28,12 @@ fun RfInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFF9D4EDD)
+    val topicTitle = title ?: "Случайный лес"
 
     var nTrees by remember { mutableIntStateOf(15) }
     var maxDepth by remember { mutableIntStateOf(4) }
@@ -123,6 +127,16 @@ fun RfInteractive(
                     fontSize = 13.sp,
                     lineHeight = 18.sp
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "число деревьев = $nTrees, максимальная глубина = $maxDepth",
+                            "точность одного дерева ${(singleTreeAcc * 100).roundToInt()}%, точность леса ${(forestAcc * 100).roundToInt()}%"
+                        )
+                    )
+                })
             }
         }
     }

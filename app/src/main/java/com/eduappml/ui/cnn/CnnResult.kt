@@ -8,10 +8,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
 import com.eduappml.ui.common.QuizSection
+import com.eduappml.ui.common.buildResultChatPrompt
 import kotlin.math.roundToInt
 
 private val cnnQuiz = listOf(
@@ -58,9 +60,10 @@ private val cnnQuiz = listOf(
 )
 
 @Composable
-fun CnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun CnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFFFFD93D)
+    val topicTitle = title ?: "Свёрточная сеть"
 
     val net = remember { CnnLab.train(nFilters = 4, lr = 0.05f, epochs = 20) }
     val accuracy = remember { CnnLab.accuracy(net, CnnLab.testSet) }
@@ -82,6 +85,16 @@ fun CnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit)
                     "Точность на контрольной выборке (другие позиции линий, чем при обучении): ${(accuracy * 100).roundToInt()}%",
                     color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildResultChatPrompt(
+                            topicTitle,
+                            "4 фильтра 3×3, 20 эпох обучения",
+                            "точность на контрольной выборке (другие позиции линий, чем при обучении) ${(accuracy * 100).roundToInt()}%"
+                        )
+                    )
+                })
             }
         }
 

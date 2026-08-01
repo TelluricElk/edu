@@ -8,10 +8,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
 import com.eduappml.ui.common.QuizSection
+import com.eduappml.ui.common.buildResultChatPrompt
 import kotlin.math.roundToInt
 
 private val trQuiz = listOf(
@@ -58,9 +60,10 @@ private val trQuiz = listOf(
 )
 
 @Composable
-fun TrResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun TrResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFF4D96FF)
+    val topicTitle = title ?: "Трансформер"
 
     val weights = remember { TrLab.attentionWeights() }
     val catIndex = 1 // "кот"
@@ -86,6 +89,16 @@ fun TrResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) 
                     "Вес внимания «кот» → «мышь»: ${(weights[catIndex][mouseIndex] * 100).roundToInt()}% — заметно выше, чем к словам с другими признаками.",
                     color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildResultChatPrompt(
+                            topicTitle,
+                            "вручную заданные эмбеддинги слов (не обученные), настоящая формула self-attention",
+                            "вес внимания «кот» → «мышь» ${(weights[catIndex][mouseIndex] * 100).roundToInt()}%, заметно выше, чем к словам с другими признаками"
+                        )
+                    )
+                })
             }
         }
 

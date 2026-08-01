@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
@@ -57,7 +58,7 @@ private val kmQuiz = listOf(
 )
 
 @Composable
-fun KmResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun KmResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFFE63946)
 
@@ -80,6 +81,15 @@ fun KmResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) 
                     "Итоговая инерция: ${"%.0f".format(state.inertia)}",
                     color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        "Объясни, пожалуйста, простыми словами, почему получился именно такой результат в теме «${title ?: "K-средних"}» (Решение задачи).\n\n" +
+                        "Параметры: k = 4, 15 итераций алгоритма Ллойда.\n" +
+                        "Итоговая инерция: ${"%.0f".format(state.inertia)}\n\n" +
+                        "Что означает это число и почему получилось именно такое значение?"
+                    )
+                })
             }
         }
 

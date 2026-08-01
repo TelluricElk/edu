@@ -14,10 +14,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
 import com.eduappml.ui.common.QuizSection
+import com.eduappml.ui.common.buildResultChatPrompt
 import kotlin.math.roundToInt
 
 private val dmQuiz = listOf(
@@ -64,9 +66,10 @@ private val dmQuiz = listOf(
 )
 
 @Composable
-fun DmResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun DmResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFF9D4EDD)
+    val topicTitle = title ?: "Диффузионная модель"
 
     val samples = remember { DmLab.reverseSample(nPoints = 200, nSteps = 50) }
     val convergence = remember { DmLab.convergenceRatio(samples) }
@@ -103,6 +106,16 @@ fun DmResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) 
                     "Доля точек, дошедших до одного из двух облаков: ${(convergence * 100).roundToInt()}%",
                     color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildResultChatPrompt(
+                            topicTitle,
+                            "50 шагов детерминированного обратного процесса, точная score-функция",
+                            "доля точек, дошедших до одного из двух облаков ${(convergence * 100).roundToInt()}%"
+                        )
+                    )
+                })
             }
         }
 

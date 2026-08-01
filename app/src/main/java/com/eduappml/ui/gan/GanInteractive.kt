@@ -15,7 +15,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -26,10 +28,12 @@ fun GanInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFF00C2A8)
+    val topicTitle = title ?: "GAN"
 
     var steps by remember { mutableIntStateOf(300) }
     var lrD by remember { mutableFloatStateOf(0.05f) }
@@ -106,6 +110,16 @@ fun GanInteractive(
                     fontSize = 13.sp,
                     lineHeight = 18.sp
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "шагов обучения = $steps, скорость обучения дискриминатора = ${"%.3f".format(lrD)}, скорость обучения генератора = ${"%.3f".format(lrG)}",
+                            "точность дискриминатора ${(discAcc * 100).roundToInt()}% (число нестабильно от запуска к запуску — это нормальное свойство GAN)"
+                        )
+                    )
+                })
             }
         }
     }

@@ -16,7 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlin.math.roundToInt
 
 @Composable
@@ -24,10 +26,12 @@ fun TrInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFF4D96FF)
+    val topicTitle = title ?: "Трансформер"
 
     val weights = remember { TrLab.attentionWeights() }
     var selected by remember { mutableIntStateOf(1) } // по умолчанию — "кот"
@@ -59,6 +63,16 @@ fun TrInteractive(
             color = textColor.copy(alpha = 0.75f), fontSize = 13.sp, lineHeight = 18.sp,
             modifier = Modifier.padding(bottom = 4.dp)
         )
+        AskChatButton(accent = accent, onClick = {
+            val topIdx = weights[selected].indices.maxByOrNull { if (it == selected) -1f else weights[selected][it] } ?: selected
+            onOpenChat(
+                buildInteractiveChatPrompt(
+                    topicTitle,
+                    "выбранное слово «${TrLab.words[selected]}», вручную заданные (не обученные) эмбеддинги",
+                    "сильнее всего внимание направлено на «${TrLab.words[topIdx]}» (${(weights[selected][topIdx] * 100).roundToInt()}%)"
+                )
+            )
+        })
 
         Text(
             "Вес внимания от «${TrLab.words[selected]}» к каждому слову:",

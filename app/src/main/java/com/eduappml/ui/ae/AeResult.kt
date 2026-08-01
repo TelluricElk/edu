@@ -8,10 +8,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
 import com.eduappml.ui.common.QuizSection
+import com.eduappml.ui.common.buildResultChatPrompt
 
 private val aeQuiz = listOf(
     QuizQuestion(
@@ -57,9 +59,10 @@ private val aeQuiz = listOf(
 )
 
 @Composable
-fun AeResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun AeResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFFFF914D)
+    val topicTitle = title ?: "Автокодировщик"
 
     val ae = remember { AeLab.train(bottleneck = 1, lr = 0.15f, epochs = 300) }
     val mse = remember { AeLab.mse(ae, AeLab.testSet) }
@@ -86,6 +89,16 @@ fun AeResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) 
                     "Даже сжимая пару чисел (X, Y) до одного, сеть восстанавливает положение точки на дуге с небольшой ошибкой — потому что дуга по сути одномерна.",
                     color = textColor.copy(alpha = 0.7f), fontSize = 12.5.sp
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildResultChatPrompt(
+                            topicTitle,
+                            "горлышко = 1 число, 300 эпох обучения",
+                            "ошибка реконструкции (MSE) на контрольной выборке ${"%.4f".format(mse)}"
+                        )
+                    )
+                })
             }
         }
 

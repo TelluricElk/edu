@@ -17,7 +17,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -28,10 +30,12 @@ fun RnnInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFF6BCB77)
+    val topicTitle = title ?: "Рекуррентная сеть"
 
     var length by remember { mutableIntStateOf(3) }
     var learningRate by remember { mutableFloatStateOf(0.15f) }
@@ -146,6 +150,16 @@ fun RnnInteractive(
 
                 Spacer(Modifier.height(8.dp))
                 Text(text = rnnInsight(length, testAcc), color = textColor.copy(alpha = 0.75f), fontSize = 13.sp, lineHeight = 18.sp)
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "длина последовательности = $length, скорость обучения = ${"%.2f".format(learningRate)}, эпох = $epochs",
+                            "точность на контрольной выборке ${(testAcc * 100).roundToInt()}%"
+                        )
+                    )
+                })
             }
         }
     }

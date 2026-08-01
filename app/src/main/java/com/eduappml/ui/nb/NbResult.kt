@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
@@ -57,7 +58,7 @@ private val nbQuiz = listOf(
 )
 
 @Composable
-fun NbResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun NbResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFF4D96FF)
 
@@ -81,6 +82,15 @@ fun NbResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) 
                     "Точность на контрольной выборке: ${(accuracy * 100).toInt()}%",
                     color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        "Объясни, пожалуйста, простыми словами, почему получился именно такой результат в теме «${title ?: "Наивный Байес"}» (Решение задачи).\n\n" +
+                        "Гауссовский наивный Байес, параметры оценены по обучающей выборке.\n" +
+                        "Точность на контрольной выборке: ${(accuracy * 100).toInt()}%\n\n" +
+                        "Что означает это число и почему получилось именно такое значение?"
+                    )
+                })
             }
         }
 

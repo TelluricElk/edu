@@ -10,7 +10,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eduappml.ui.ae.AeResult
 import com.eduappml.ui.cnn.CnnResult
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildResultChatPrompt
 import com.eduappml.ui.dm.DmResult
 import com.eduappml.ui.dt.DtResult
 import com.eduappml.ui.fc.FcResult
@@ -35,34 +37,38 @@ import kotlin.math.roundToInt
  * Экран "Решение задачи" (пузырь-алмаз). Показывает итог эталонного прогона
  * на рекомендованных гиперпараметрах и встроенный тест по теме — для каждого
  * алгоритма своя реализация, диспетчеризуемая по id.
+ *
+ * [onOpenChat] — колбэк для кнопки "Почему получился именно такой результат"
+ * (см. аналогичный параметр в MathScreen.kt) — прокидывается в каждую тему.
  */
 @Composable
 fun ResultScreen(
     modifier: Modifier = Modifier,
     id: String,
     title: String? = null,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     when (id) {
-        "knn" -> KnnResult(modifier = modifier, title = title, onBack = onBack)
-        "lr" -> LrResult(modifier = modifier, title = title, onBack = onBack)
-        "logr" -> LogrResult(modifier = modifier, title = title, onBack = onBack)
-        "svm" -> SvmResult(modifier = modifier, title = title, onBack = onBack)
-        "dt" -> DtResult(modifier = modifier, title = title, onBack = onBack)
-        "nb" -> NbResult(modifier = modifier, title = title, onBack = onBack)
-        "rf" -> RfResult(modifier = modifier, title = title, onBack = onBack)
-        "gb" -> GbResult(modifier = modifier, title = title, onBack = onBack)
-        "km" -> KmResult(modifier = modifier, title = title, onBack = onBack)
-        "fc" -> FcResult(modifier = modifier, title = title, onBack = onBack)
-        "som" -> SomResult(modifier = modifier, title = title, onBack = onBack)
-        "rl" -> RlResult(modifier = modifier, title = title, onBack = onBack)
-        "ae" -> AeResult(modifier = modifier, title = title, onBack = onBack)
-        "gan" -> GanResult(modifier = modifier, title = title, onBack = onBack)
-        "cnn" -> CnnResult(modifier = modifier, title = title, onBack = onBack)
-        "rnn" -> RnnResult(modifier = modifier, title = title, onBack = onBack)
-        "gnn" -> GnnResult(modifier = modifier, title = title, onBack = onBack)
-        "tr" -> TrResult(modifier = modifier, title = title, onBack = onBack)
-        "dm" -> DmResult(modifier = modifier, title = title, onBack = onBack)
+        "knn" -> KnnResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "lr" -> LrResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "logr" -> LogrResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "svm" -> SvmResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "dt" -> DtResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "nb" -> NbResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "rf" -> RfResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "gb" -> GbResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "km" -> KmResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "fc" -> FcResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "som" -> SomResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "rl" -> RlResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "ae" -> AeResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "gan" -> GanResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "cnn" -> CnnResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "rnn" -> RnnResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "gnn" -> GnnResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "tr" -> TrResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "dm" -> DmResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
         else -> ComingSoonResult(modifier = modifier, title = title, id = id, onBack = onBack)
     }
 }
@@ -129,11 +135,12 @@ private val knnQuiz = listOf(
 )
 
 @Composable
-private fun KnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+private fun KnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accuracy = remember {
         KnnLab.evaluateAccuracy(KnnLab.referenceK, KnnLab.referenceMetric, KnnLab.referenceWeighting)
     }
+    val topicTitle = title ?: "k-NN"
 
     LessonScaffold(
         eyebrow = "Решение задачи",
@@ -149,18 +156,25 @@ private fun KnnResult(modifier: Modifier = Modifier, title: String?, onBack: () 
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Эталонное решение", color = textColor, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                 Spacer(Modifier.height(8.dp))
+                val paramsText = "k = ${KnnLab.referenceK}, метрика — ${KnnLab.referenceMetric.label}, " +
+                    "взвешивание — ${KnnLab.referenceWeighting.label}."
                 Text(
-                    text = "Параметры: k = ${KnnLab.referenceK}, метрика — ${KnnLab.referenceMetric.label}, " +
-                        "взвешивание — ${KnnLab.referenceWeighting.label}.",
+                    text = "Параметры: $paramsText",
                     color = textColor.copy(alpha = 0.85f),
                     fontSize = 14.sp
                 )
                 Spacer(Modifier.height(4.dp))
+                val metricText = "точность на контрольной выборке ${(accuracy * 100).roundToInt()}%"
                 Text(
                     text = "Точность на контрольной выборке: ${(accuracy * 100).roundToInt()}%",
                     color = textColor,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold
+                )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(
+                    accent = Color(0xFFE53935),
+                    onClick = { onOpenChat(buildResultChatPrompt(topicTitle, paramsText, metricText)) }
                 )
             }
         }

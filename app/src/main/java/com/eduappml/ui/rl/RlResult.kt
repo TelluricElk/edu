@@ -8,10 +8,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
 import com.eduappml.ui.common.QuizSection
+import com.eduappml.ui.common.buildResultChatPrompt
 
 private val rlQuiz = listOf(
     QuizQuestion(
@@ -57,9 +59,10 @@ private val rlQuiz = listOf(
 )
 
 @Composable
-fun RlResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun RlResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFF00B4D8)
+    val topicTitle = title ?: "Обучение с подкреплением"
 
     val result = remember { RlLab.train(episodes = 150, alpha = 0.3f, epsilon = 0.2f) }
     val path = remember(result) { RlLab.greedyPath(result.q) }
@@ -78,11 +81,22 @@ fun RlResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) 
                 Spacer(Modifier.height(8.dp))
                 Text("Параметры: 150 эпизодов, α = 0,3, ε = 0,2.", color = textColor.copy(alpha = 0.85f), fontSize = 14.sp)
                 Spacer(Modifier.height(4.dp))
+                val resultText = if (reachedGoal) "Найденный путь: ${path.size - 1} шагов (оптимум для этого лабиринта — 14)."
+                    else "Агент пока не нашёл устойчивый путь до цели с этими параметрами."
                 Text(
-                    if (reachedGoal) "Найденный путь: ${path.size - 1} шагов (оптимум для этого лабиринта — 14)."
-                    else "Агент пока не нашёл устойчивый путь до цели с этими параметрами.",
+                    resultText,
                     color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildResultChatPrompt(
+                            topicTitle,
+                            "150 эпизодов, α = 0,3, ε = 0,2",
+                            resultText
+                        )
+                    )
+                })
             }
         }
 

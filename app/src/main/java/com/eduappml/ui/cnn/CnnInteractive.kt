@@ -18,8 +18,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.BottomPillButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -33,10 +35,12 @@ fun CnnInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFFFFD93D)
+    val topicTitle = title ?: "Свёрточная сеть"
 
     var nFilters by remember { mutableIntStateOf(1) }
     var learningRate by remember { mutableFloatStateOf(0.05f) }
@@ -143,6 +147,16 @@ fun CnnInteractive(
 
                 Spacer(Modifier.height(8.dp))
                 Text(text = cnnInsight(nFilters, testAcc), color = textColor.copy(alpha = 0.75f), fontSize = 13.sp, lineHeight = 18.sp)
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "число фильтров = $nFilters, скорость обучения = ${"%.2f".format(learningRate)}, эпох = $epochs",
+                            "точность на контрольной выборке ${(testAcc * 100).roundToInt()}%"
+                        )
+                    )
+                })
             }
         }
     }

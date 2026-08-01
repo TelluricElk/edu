@@ -14,7 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -23,10 +25,12 @@ fun LogrInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFFFFD93D)
+    val topicTitle = title ?: "Логистическая регрессия"
 
     var learningRate by remember { mutableFloatStateOf(0.3f) }
     var epochs by remember { mutableIntStateOf(150) }
@@ -110,6 +114,21 @@ fun LogrInteractive(
                     fontSize = 13.sp,
                     lineHeight = 18.sp
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    val resultText = if (fitResult.diverged) {
+                        "модель разошлась — скорость обучения слишком велика"
+                    } else {
+                        "TP=${cm.tp} FP=${cm.fp} TN=${cm.tn} FN=${cm.fn}, precision=${"%.2f".format(cm.precision)}, recall=${"%.2f".format(cm.recall)}, accuracy=${"%.2f".format(cm.accuracy)}"
+                    }
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "скорость обучения = ${"%.2f".format(learningRate)}, эпох = $epochs, порог классификации = ${"%.2f".format(threshold)}",
+                            resultText
+                        )
+                    )
+                })
             }
         }
     }

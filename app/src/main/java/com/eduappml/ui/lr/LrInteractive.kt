@@ -15,7 +15,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -24,10 +26,12 @@ fun LrInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFFFF6B6B)
+    val topicTitle = title ?: "Линейная регрессия"
 
     var learningRate by remember { mutableFloatStateOf(0.04f) }
     var epochs by remember { mutableIntStateOf(25) }
@@ -134,6 +138,21 @@ fun LrInteractive(
                     fontSize = 13.sp,
                     lineHeight = 18.sp
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    val resultText = if (result.diverged) {
+                        "модель разошлась (диверджировала) — скорость обучения слишком велика"
+                    } else {
+                        "MSE = ${"%.1f".format(testMse)}, R² = ${"%.3f".format(testR2)}"
+                    }
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "скорость обучения = ${"%.3f".format(learningRate)}, число эпох = $epochs",
+                            resultText
+                        )
+                    )
+                })
             }
         }
     }

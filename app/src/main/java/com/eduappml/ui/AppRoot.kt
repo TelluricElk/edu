@@ -222,7 +222,8 @@ fun AppRoot() {
                             id = currentScreen.id,
                             screenType = currentScreen.screenType,
                             title = labelFor(currentScreen.id, currentScreen.screenType),
-                            onNext = { screen = Screen.Result(currentScreen.id, currentScreen.screenType, currentScreen.returnTo) }
+                            onNext = { screen = Screen.Result(currentScreen.id, currentScreen.screenType, currentScreen.returnTo) },
+                            onOpenChat = { message -> screen = Screen.Chat(prefillMessage = message, returnTo = currentScreen) }
                         )
                     }
                     is Screen.Result -> {
@@ -230,7 +231,8 @@ fun AppRoot() {
                             modifier = Modifier.fillMaxSize(),
                             id = currentScreen.id,
                             title = labelFor(currentScreen.id, currentScreen.screenType),
-                            onBack = { screen = currentScreen.returnTo }
+                            onBack = { screen = currentScreen.returnTo },
+                            onOpenChat = { message -> screen = Screen.Chat(prefillMessage = message, returnTo = currentScreen) }
                         )
                     }
                 }

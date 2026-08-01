@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
@@ -63,7 +64,7 @@ private val lrQuiz = listOf(
 )
 
 @Composable
-fun LrResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun LrResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFFFF6B6B)
 
@@ -94,6 +95,15 @@ fun LrResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) 
                     "MSE на контрольной выборке: ${"%.1f".format(mse)}, R² = ${"%.3f".format(r2)}",
                     color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        "Объясни, пожалуйста, простыми словами, почему получился именно такой результат в теме «${title ?: "Линейная регрессия"}» (Решение задачи).\n\n" +
+                        "Уравнение прямой: цена ≈ ${"%.2f".format(w1)}·площадь + ${"%.1f".format(w0)}\n" +
+                        "MSE на контрольной выборке: ${"%.1f".format(mse)}, R² = ${"%.3f".format(r2)}\n\n" +
+                        "Что означают эти числа и почему получились именно такими?"
+                    )
+                })
             }
         }
 

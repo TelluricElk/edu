@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
@@ -57,7 +58,7 @@ private val gbQuiz = listOf(
 )
 
 @Composable
-fun GbResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun GbResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFF00C2A8)
 
@@ -82,6 +83,15 @@ fun GbResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) 
                     "Лучшая контрольная MSE достигнута на итерации ${bestIdx + 1}: ${"%.1f".format(bestTestMse)}",
                     color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        "Объясни, пожалуйста, простыми словами, почему получился именно такой результат в теме «${title ?: "Градиентный бустинг"}» (Решение задачи).\n\n" +
+                        "Параметры: n_estimators = 40, learning rate = 0,15.\n" +
+                        "Лучшая контрольная MSE достигнута на итерации ${bestIdx + 1}: ${"%.1f".format(bestTestMse)}\n\n" +
+                        "Что означают эти числа и почему получились именно такими?"
+                    )
+                })
             }
         }
 

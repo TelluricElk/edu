@@ -14,10 +14,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
 import com.eduappml.ui.common.QuizSection
+import com.eduappml.ui.common.buildResultChatPrompt
 
 private val somQuiz = listOf(
     QuizQuestion(
@@ -63,9 +65,10 @@ private val somQuiz = listOf(
 )
 
 @Composable
-fun SomResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun SomResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFFE63946)
+    val topicTitle = title ?: "Карта Кохонена"
 
     val map = remember { SomLab.trainUpTo(SomLab.DECAY_HORIZON, seed = 7) }
     val smoothness = remember { SomLab.averageNeighborDistance(map) }
@@ -107,6 +110,16 @@ fun SomResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit)
                     "После ${SomLab.DECAY_HORIZON} шагов обучения. Средняя разница соседних нейронов: ${"%.3f".format(smoothness)} (было ~0,65 при случайной инициализации).",
                     color = textColor.copy(alpha = 0.85f), fontSize = 13.sp
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildResultChatPrompt(
+                            topicTitle,
+                            "${SomLab.DECAY_HORIZON} шагов обучения, случайная инициализация (seed = 7)",
+                            "средняя разница соседних нейронов ${"%.3f".format(smoothness)} (было ~0,65 при случайной инициализации)"
+                        )
+                    )
+                })
             }
         }
 

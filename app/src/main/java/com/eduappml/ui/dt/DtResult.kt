@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
@@ -58,7 +59,7 @@ private val dtQuiz = listOf(
 )
 
 @Composable
-fun DtResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun DtResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFFFF914D)
 
@@ -83,6 +84,15 @@ fun DtResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) 
                     "Точность: обучающая ${(trainAcc * 100).roundToInt()}%, контрольная ${(testAcc * 100).roundToInt()}%",
                     color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        "Объясни, пожалуйста, простыми словами, почему получился именно такой результат в теме «${title ?: "Дерево решений"}» (Решение задачи).\n\n" +
+                        "Параметры: max_depth = 4, критерий — Джини.\n" +
+                        "Точность: обучающая ${(trainAcc * 100).roundToInt()}%, контрольная ${(testAcc * 100).roundToInt()}%\n\n" +
+                        "Что означают эти числа и почему получились именно такими?"
+                    )
+                })
             }
         }
 

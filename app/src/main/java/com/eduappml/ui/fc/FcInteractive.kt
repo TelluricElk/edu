@@ -14,7 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -26,10 +28,12 @@ fun FcInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFFFF6B6B)
+    val topicTitle = title ?: "Полносвязная сеть"
 
     var hiddenSize by remember { mutableIntStateOf(1) }
     var learningRate by remember { mutableFloatStateOf(0.5f) }
@@ -119,6 +123,16 @@ fun FcInteractive(
                     fontSize = 13.sp,
                     lineHeight = 18.sp
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "нейронов в скрытом слое = $hiddenSize, скорость обучения = ${"%.2f".format(learningRate)}, эпох = $epochs",
+                            "точность на контрольной выборке ${(testAcc * 100).roundToInt()}%"
+                        )
+                    )
+                })
             }
         }
     }

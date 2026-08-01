@@ -19,17 +19,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.buildInteractiveChatPrompt
 
 @Composable
 fun NbInteractive(
     modifier: Modifier = Modifier,
     title: String?,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val textColor = Color.White
     val accent = Color(0xFF4D96FF)
+    val topicTitle = title ?: "Наивный Байес"
 
     val stats = remember { NbLab.fitStats(NbLab.trainSet) }
     var queryPoint by remember { mutableStateOf<Pair<Float, Float>?>(null) }
@@ -85,6 +89,18 @@ fun NbInteractive(
                 color = textColor.copy(alpha = 0.75f), fontSize = 13.sp, lineHeight = 18.sp,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
+            queryPoint?.let { (temp, humidity) ->
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildInteractiveChatPrompt(
+                            topicTitle,
+                            "точка с температурой ${"%.1f".format(temp)} и влажностью ${"%.1f".format(humidity)}",
+                            "вероятность «пляж» ${"%.0f".format(beachProb)}%, «дом» ${"%.0f".format(100 - beachProb)}%"
+                        )
+                    )
+                })
+                Spacer(Modifier.height(8.dp))
+            }
         }
 
         Text(

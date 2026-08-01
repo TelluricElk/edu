@@ -14,10 +14,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
 import com.eduappml.ui.common.QuizSection
+import com.eduappml.ui.common.buildResultChatPrompt
 import kotlin.math.roundToInt
 
 private val ganQuiz = listOf(
@@ -64,9 +66,10 @@ private val ganQuiz = listOf(
 )
 
 @Composable
-fun GanResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit) {
+fun GanResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
     val textColor = Color.White
     val accent = Color(0xFF00C2A8)
+    val topicTitle = title ?: "GAN"
 
     val gan = remember { GanLab.train(steps = 500, lrD = 0.05f, lrG = 0.05f) }
     val generated = remember(gan) { GanLab.generatedSample(gan.g, 120) }
@@ -109,6 +112,16 @@ fun GanResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit)
                     "Из-за нестабильности обучения GAN это число — не гарантированный результат, а иллюстрация одного конкретного прогона: при других шагах или скоростях обучения оно может быть заметно другим.",
                     color = textColor.copy(alpha = 0.65f), fontSize = 12.sp
                 )
+                Spacer(Modifier.height(10.dp))
+                AskChatButton(accent = accent, onClick = {
+                    onOpenChat(
+                        buildResultChatPrompt(
+                            topicTitle,
+                            "500 шагов, скорость обучения дискриминатора и генератора — по 0,05",
+                            "точность дискриминатора при этом прогоне ${(discAcc * 100).roundToInt()}% (число нестабильно от запуска к запуску — это нормальное свойство GAN)"
+                        )
+                    )
+                })
             }
         }
 
