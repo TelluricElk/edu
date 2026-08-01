@@ -140,9 +140,18 @@ private fun highlightCodeLine(code: String, language: String) = buildAnnotatedSt
     }
 }
 
-/** Карточка кода, оформленная как окно редактора: вкладка с точками, гаттер номеров строк, подсветка. */
+/**
+ * Карточка кода, оформленная как окно редактора: вкладка с точками, гаттер номеров строк, подсветка.
+ * [onAskChat] — опциональный колбэк для кнопки "Объяснить в чате" (см. LessonSectionBlock
+ * в LessonMarkdown.kt — тот же принцип: по умолчанию null, кнопки нет, пока её явно не подключат).
+ */
 @Composable
-fun CodeBlockCard(block: ContentBlock.Code, modifier: Modifier = Modifier) {
+fun CodeBlockCard(
+    block: ContentBlock.Code,
+    modifier: Modifier = Modifier,
+    accent: Color = CODE_TYPE,
+    onAskChat: ((ContentBlock.Code) -> Unit)? = null
+) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -200,6 +209,12 @@ fun CodeBlockCard(block: ContentBlock.Code, modifier: Modifier = Modifier) {
                         softWrap = false
                     )
                 }
+            }
+        }
+
+        if (onAskChat != null) {
+            Box(modifier = Modifier.padding(start = 14.dp, top = 2.dp, end = 14.dp, bottom = 12.dp)) {
+                AskChatButton(accent = accent, onClick = { onAskChat(block) })
             }
         }
     }

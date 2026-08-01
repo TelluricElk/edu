@@ -44,7 +44,8 @@ private sealed class Screen {
     data object Menu   : Screen()
     data object Third  : Screen()
     data object Glossary : Screen()
-    data object Chat : Screen()
+
+    data class Chat(val prefillMessage: String? = null, val returnTo: Screen = Splash) : Screen()
 
     data class NodeDetail(
         val id: String,
@@ -94,7 +95,7 @@ fun AppRoot() {
                     Screen.Splash -> SplashForeground(
                         modifier = Modifier.fillMaxSize(),
                         onFinishedFadeOut = { screen = Screen.Menu },
-                        onOpenChat = { screen = Screen.Chat }
+                        onOpenChat = { screen = Screen.Chat() }
                     )
                     Screen.Login -> LoginScreen(
                         onLoginSuccess = {
@@ -143,9 +144,10 @@ fun AppRoot() {
                         modifier = Modifier.fillMaxSize(),
                         onBack = { screen = Screen.Menu }
                     )
-                    Screen.Chat -> ChatScreen(
+                    is Screen.Chat -> ChatScreen(
                         modifier = Modifier.fillMaxSize(),
-                        onBack = { screen = Screen.Splash }
+                        onBack = { screen = currentScreen.returnTo },
+                        prefillMessage = currentScreen.prefillMessage
                     )
 
                     is Screen.NodeDetail -> {
@@ -180,7 +182,8 @@ fun AppRoot() {
                             id = currentScreen.id,
                             title = labelFor(currentScreen.id, currentScreen.screenType),
                             onBack = { screen = currentScreen.returnTo },
-                            onNext = { screen = Screen.Task(currentScreen.id, currentScreen.screenType, currentScreen.returnTo) }
+                            onNext = { screen = Screen.Task(currentScreen.id, currentScreen.screenType, currentScreen.returnTo) },
+                            onOpenChat = { message -> screen = Screen.Chat(prefillMessage = message, returnTo = currentScreen) }
                         )
                     }
                     is Screen.Task -> {
@@ -198,7 +201,8 @@ fun AppRoot() {
                             id = currentScreen.id,
                             title = labelFor(currentScreen.id, currentScreen.screenType),
                             onBack = { screen = currentScreen.returnTo },
-                            onNext = { screen = Screen.Code(currentScreen.id, currentScreen.screenType, currentScreen.returnTo) }
+                            onNext = { screen = Screen.Code(currentScreen.id, currentScreen.screenType, currentScreen.returnTo) },
+                            onOpenChat = { message -> screen = Screen.Chat(prefillMessage = message, returnTo = currentScreen) }
                         )
                     }
                     is Screen.Code -> {
@@ -207,7 +211,8 @@ fun AppRoot() {
                             id = currentScreen.id,
                             title = labelFor(currentScreen.id, currentScreen.screenType),
                             onBack = { screen = currentScreen.returnTo },
-                            onNext = { screen = Screen.Interactive(currentScreen.id, currentScreen.screenType, currentScreen.returnTo) }
+                            onNext = { screen = Screen.Interactive(currentScreen.id, currentScreen.screenType, currentScreen.returnTo) },
+                            onOpenChat = { message -> screen = Screen.Chat(prefillMessage = message, returnTo = currentScreen) }
                         )
                     }
                     is Screen.Interactive -> {

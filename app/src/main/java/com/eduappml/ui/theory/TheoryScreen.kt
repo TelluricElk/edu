@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.eduappml.data.InfoRepository
 import com.eduappml.ui.common.LessonScaffold
+import com.eduappml.ui.common.LessonSection
 import com.eduappml.ui.common.LessonSectionBlock
 import com.eduappml.ui.common.NotFoundPlaceholder
 import com.eduappml.ui.common.parseLessonSections
@@ -19,6 +20,10 @@ import com.eduappml.ui.common.parseLessonSections
 /**
  * Экран "Теория" (пузырь-книга). Полностью самостоятельный экран — не вкладка
  * внутри общего InfoScreen, а отдельный шаг в последовательности изучения темы.
+ *
+ * [onOpenChat] — см. аналогичный параметр в MathScreen.kt: готовит текст
+ * вопроса для Edu.AI по конкретному разделу, предзаполняет им поле ввода
+ * чата (не отправляет автоматически).
  */
 @Composable
 fun TheoryScreen(
@@ -26,7 +31,8 @@ fun TheoryScreen(
     id: String,
     title: String? = null,
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val textColor = Color(0xFFF2EEFF)
@@ -54,11 +60,32 @@ fun TheoryScreen(
                 CircularProgressIndicator(color = textColor)
             }
             content != null -> {
+                val topicTitle = title ?: id
                 parseLessonSections(content!!).forEach { section ->
-                    LessonSectionBlock(section = section, textColor = textColor, accent = accent)
+                    LessonSectionBlock(
+                        section = section,
+                        textColor = textColor,
+                        accent = accent,
+                        onAskChat = { sec -> onOpenChat(buildTheoryChatPrompt(topicTitle, sec)) }
+                    )
                 }
             }
             else -> NotFoundPlaceholder(id = id, section = "general", label = "Теория", textColor = textColor)
+        }
+    }
+}
+
+/** Готовый черновик вопроса для Edu.AI по конкретному разделу теории — см. аналог в MathScreen.kt. */
+private fun buildTheoryChatPrompt(topicTitle: String, section: LessonSection): String {
+    val maxBodyLength = 500
+    val body = section.body.trim().let {
+        if (it.length > maxBodyLength) it.take(maxBodyLength).trimEnd() + "…" else it
+    }
+    return buildString {
+        append("Объясни, пожалуйста, простыми словами раздел «${section.title}» из темы «$topicTitle» (Теория).")
+        if (body.isNotBlank()) {
+            append("\n\nВот сам раздел:\n")
+            append(body)
         }
     }
 }

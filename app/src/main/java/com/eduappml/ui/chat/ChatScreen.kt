@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.eduappml.ThemeManager
+import com.eduappml.ui.common.MarkdownText
 import com.eduappml.ui.common.WaveBackground
 import kotlinx.coroutines.launch
 
@@ -34,7 +35,8 @@ private val AccentColor = Color(0xFFB9B6FF)
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    prefillMessage: String? = null
 ) {
     val context = LocalContext.current
     val isDark = ThemeManager.isDarkThemeActive(context)
@@ -43,7 +45,10 @@ fun ChatScreen(
     val messages by viewModel.messages.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    var input by remember { mutableStateOf("") }
+    // Предзаполняем поле ввода, но НЕ отправляем автоматически — пользователь
+    // должен увидеть готовый черновик вопроса и сам решить, отправлять его
+    // как есть или поправить. См. HANDOFF_BRIEFING.md / обсуждение в чате.
+    var input by remember { mutableStateOf(prefillMessage.orEmpty()) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
@@ -199,11 +204,15 @@ private fun ChatBubble(message: ChatUiMessage) {
                 .border(1.dp, borderColor, RoundedCornerShape(18.dp))
                 .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
-            Text(
-                text = message.text,
-                color = Color.White,
-                fontSize = 15.sp,
-                lineHeight = 20.sp
+            // MarkdownText вместо обычного Text — тот же рендерер, что и в
+            // "Мат. основе" темы, поэтому формулы из ответа GigaChat отображаются
+            // тем же, уже проверенным способом. normalizeChatMath() приводит
+            // разные обозначения LaTeX из ответа к единому блочному формату,
+            // который умеет рендерить MarkdownText (см. ChatMathFormat.kt).
+            MarkdownText(
+                markdown = normalizeChatMath(message.text),
+                textColor = Color.White,
+                textSizeSp = 15f
             )
         }
     }

@@ -1,5 +1,6 @@
 package com.eduappml.ui.common
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,12 +8,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -74,13 +82,21 @@ fun parseLessonSections(markdown: String): List<LessonSection> {
     return sections
 }
 
-/** Цветной акцентный маркер + заголовок раздела + markdown-тело. */
+/**
+ * Цветной акцентный маркер + заголовок раздела + markdown-тело +
+ * (опционально) кнопка "Объяснить в чате" — если передан [onAskChat],
+ * появляется под разделами, у которых есть и заголовок, и текст (то есть
+ * не под самым первым, общим заголовком темы — там обычно текста нет,
+ * сразу идёт первый пронумерованный раздел). По умолчанию кнопки нет —
+ * фича включена только там, где явно подключена.
+ */
 @Composable
 fun LessonSectionBlock(
     section: LessonSection,
     textColor: Color,
     accent: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onAskChat: ((LessonSection) -> Unit)? = null
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(bottom = 22.dp)) {
         if (section.title.isNotBlank()) {
@@ -139,6 +155,39 @@ fun LessonSectionBlock(
                 textSizeSp = 16f
             )
         }
+        if (onAskChat != null && section.title.isNotBlank() && section.body.isNotBlank()) {
+            Spacer(Modifier.height(10.dp))
+            AskChatButton(accent = accent, onClick = { onAskChat(section) })
+        }
+    }
+}
+
+/** Маленькая, ненавязчивая кнопка — под рукой, когда реально нужна, а не первое, что бросается в глаза.
+ * internal (не private) — переиспользуется и в CodeBlockView.kt того же пакета. */
+@Composable
+internal fun AskChatButton(accent: Color, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(accent.copy(alpha = 0.12f))
+            .border(1.dp, accent.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 7.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Filled.ChatBubble,
+            contentDescription = null,
+            tint = accent,
+            modifier = Modifier.size(14.dp)
+        )
+        Text2(
+            text = "Объяснить в чате",
+            color = accent,
+            fontSize = 12.5.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
