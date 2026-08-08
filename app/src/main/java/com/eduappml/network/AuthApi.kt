@@ -6,8 +6,10 @@ import retrofit2.http.*
 
 interface AuthApi {
     // === Аутентификация ===
+    // При ENABLE_EMAIL_AUTOCONFIRM=false GoTrue возвращает на /signup
+    // плоский объект User (без access_token и без вложенного "user")
     @POST("auth/v1/signup")
-    suspend fun register(@Body request: SupabaseSignUpRequest): Response<AuthResponse>
+    suspend fun register(@Body request: SupabaseSignUpRequest): Response<User>
 
     @POST("auth/v1/token?grant_type=password")
     suspend fun login(@Body request: LoginRequest): Response<AuthResponse>
@@ -63,7 +65,7 @@ interface AuthApi {
         @Body request: VerifyCodeRequest
     ): Response<VerifyCodeResponse>
 
-    // === Edge Function для чата с GigaChat ===
+    // === Edge Function для чата с GigaChat (Edu.AI) ===
     @POST("functions/v1/chat")
     suspend fun sendChatMessage(
         @Body request: ChatRequest

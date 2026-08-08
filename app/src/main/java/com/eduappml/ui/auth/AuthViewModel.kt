@@ -47,21 +47,22 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                 val response = ApiClient.authApi.register(request)
 
                 if (response.isSuccessful) {
-                    val body = response.body()
-                    // При включённом подтверждении email access_token не приходит, и это нормально
-                    if (body != null && body.user != null) {
+                    // GoTrue при включённом подтверждении email возвращает ПЛОСКИЙ объект User
+                    val user = response.body()
+                    if (user != null && user.id.isNotEmpty()) {
                         pendingRegistration = PendingRegistration(
                             email = email,
                             password = password,
                             username = username.trim(),
                             fullName = fullName,
-                            userId = body.user.id
+                            userId = user.id
                         )
                         pendingEmail = email
 
                         sendVerificationCode(email)
                         _uiState.value = AuthUiState.NeedsVerification
                     } else {
+                        Log.e(TAG, "Registration: empty or unparsable body")
                         _uiState.value = AuthUiState.Error("Ошибка регистрации: пользователь не создан")
                     }
                 } else {
@@ -144,7 +145,7 @@ class AuthViewModel(private val context: Context) : ViewModel() {
         }
     }
 
-    // ---------- Вход по email ИЛИ логину (используется на экране входа) ----------
+    // ---------- Вход по email ИЛИ логину (экран входа) ----------
     fun loginWithIdentifier(identifier: String, password: String) {
         val trimmed = identifier.trim()
         if (trimmed.isEmpty() || password.isEmpty()) {
@@ -197,7 +198,7 @@ class AuthViewModel(private val context: Context) : ViewModel() {
         }
     }
 
-    // ---------- Вход по email (используется после верификации кода и после определения email по логину) ----------
+    // ---------- Вход по email ----------
     fun login(email: String, password: String) {
         if (email.isEmpty() || password.isEmpty()) {
             _uiState.value = AuthUiState.Error("Заполните все поля")
