@@ -33,7 +33,8 @@
             android:name="com.eduappml.MainActivity"
             android:configChanges="uiMode|screenLayout|screenSize|orientation"
             android:exported="true"
-            android:theme="@style/Theme.SplashScreen" >
+            android:theme="@style/Theme.EduAppML.Splash"
+            android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

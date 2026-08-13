@@ -81,15 +81,20 @@ fun ChatScreen(
                 .background(Color.Black.copy(alpha = 0.35f))
         )
 
-        // imePadding() — на ВЕСЬ столбец разговора (а не только на строку
-        // ввода, как было раньше). Так список сообщений (weight = 1f) сам
-        // сжимается, когда появляется клавиатура, и поле ввода оказывается
-        // сразу над клавиатурой без зазора — как в Telegram, а не поднимается
-        // высоко над ней с пустым местом.
+        // Отступ снизу — union() высоты клавиатуры и высоты навигационной
+        // панели, применённый ОДИН раз на весь столбец разговора. Раньше
+        // тут был отдельный imePadding() на Column И ОТДЕЛЬНЫЙ
+        // navigationBarsPadding() на строке ввода ниже — а это разные типы
+        // инсетов, Compose их не гасит друг другом. При открытой клавиатуре
+        // высота навигационной панели прибавлялась ПОВЕРХ высоты клавиатуры —
+        // это и был тот самый некрасивый "подскок" поля ввода над клавиатурой.
+        // union() берёт max(ime, navigationBars), а не сумму — снизу всегда
+        // ровно нужный отступ и ни каплей больше. Именно так это работает в
+        // Telegram и подобных чатах.
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .imePadding()
+                .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
         ) {
             // Верхняя панель
             Row(
@@ -149,14 +154,13 @@ fun ChatScreen(
                 }
             }
 
-            // Поле ввода — navigationBarsPadding() тут отвечает только за
-            // случай закрытой клавиатуры (безопасный отступ от системной
-            // навигации), клавиатуру целиком обрабатывает imePadding() на
-            // Column выше.
+            // Поле ввода — отдельный нижний отступ здесь больше не нужен,
+            // union(navigationBars, ime) уже применён один раз на Column выше
+            // и сам решает, под клавиатуру сейчас подстраиваться или под
+            // системную навигацию.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .navigationBarsPadding()
                     .padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)

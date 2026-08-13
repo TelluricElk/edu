@@ -123,12 +123,6 @@ fun LoginScreen(
             TextButton(onClick = onNavigateToRegister) {
                 Text("Нет аккаунта? Зарегистрироваться", color = Color.White)
             }
-
-            Text(
-                text = "Вход через Google или VK (скоро)",
-                color = Color.White.copy(alpha = 0.5f),
-                modifier = Modifier.padding(top = 32.dp)
-            )
         }
     }
 }

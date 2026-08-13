@@ -5,12 +5,11 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.view.Window
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.eduappml.game.GameManager
 import com.eduappml.ui.AppRoot
@@ -26,6 +25,17 @@ class MainActivity : ComponentActivity() {
         applyThemeByMode()
         super.onCreate(savedInstanceState)
 
+        // Принудительно убираем системный заголовок/ActionBar с именем
+        // приложения — той самой белой "шторки" сверху. Раньше рассчитывали
+        // только на то, что тема (обычная/сплэш/ночная) сама не будет его
+        // рисовать (windowNoTitle/windowActionBar в XML), но при переключении
+        // между несколькими темами в манифесте/values/values-night эта
+        // настройка легко теряется по цепочке наследования. Гасим его здесь
+        // явно в коде — так гарантированно не появится, независимо от того,
+        // какая тема реально применилась к активности.
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        actionBar?.hide()
+
         // Рисуем контент под системными барами
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -36,11 +46,6 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= 29) {
             window.isStatusBarContrastEnforced = false
             window.isNavigationBarContrastEnforced = false
-        }
-
-        // Полностью «съедаем» инсет-ы
-        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, _ ->
-            WindowInsetsCompat.CONSUMED
         }
 
         setContent { AppRoot() }
