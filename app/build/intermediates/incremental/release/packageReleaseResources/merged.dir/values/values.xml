@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent_dark">#BB86FC</color>
+    <color name="background_dark">#121212</color>
+    <color name="button_background_dark">#3700B3</color>
+    <color name="ic_launcher_background">#121212</color>
+    <color name="surface_dark">#1E1E1E</color>
+    <color name="text_primary_dark">#FFFFFF</color>
+    <color name="text_secondary_dark">#B3B3B3</color>
+    <string name="app_name">EduAppML</string>
+    <style name="Theme.EduAppML" parent="Theme.Material3.DayNight.NoActionBar">
+        
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+
+        
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+
+        
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+
+        
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+    </style>
+    <style name="Theme.EduAppML.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@android:color/black</item>
+        <item name="postSplashScreenTheme">@style/Theme.EduAppML</item>
+    </style>
+</resources>
