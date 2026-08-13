@@ -122,13 +122,6 @@ fun SplashForeground(
                     color = Color.White.copy(alpha = 0.95f),
                     style = TextStyle()
                 )
-                Text(
-                    text = "rnkromannk@gmail.com",
-                    textAlign = TextAlign.Start,
-                    fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.95f),
-                    style = TextStyle()
-                )
             }
 
             Row(
@@ -168,7 +161,7 @@ fun SplashForeground(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Machine Learning",
+                text = "Машинное обучение",
                 textAlign = TextAlign.Center,
                 fontSize = 36.sp,
                 lineHeight = 38.sp,
@@ -178,18 +171,9 @@ fun SplashForeground(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Educational App.",
+                text = "Образовательное приложение",
                 textAlign = TextAlign.Center,
                 fontSize = 16.sp,
-                lineHeight = 18.sp,
-                color = Color.White.copy(alpha = 0.92f),
-                style = TextStyle()
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "Author: RNK",
-                textAlign = TextAlign.Center,
-                fontSize = 14.sp,
                 lineHeight = 18.sp,
                 color = Color.White.copy(alpha = 0.92f),
                 style = TextStyle()

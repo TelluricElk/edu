@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -52,6 +53,18 @@ fun ChatScreen(
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
+    // Общая функция отправки — используется и круглой кнопкой приложения,
+    // и кнопкой "Send" самой клавиатуры (см. keyboardActions ниже). Раньше
+    // клавиатура показывала свою кнопку отправки (из-за imeAction = Send),
+    // но нажатие на неё ничего не делало — теперь оба пути ведут в одно место.
+    fun trySend() {
+        if (input.isNotBlank() && !isLoading) {
+            val text = input
+            input = ""
+            scope.launch { viewModel.sendMessage(text) }
+        }
+    }
+
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.size - 1)
@@ -68,7 +81,16 @@ fun ChatScreen(
                 .background(Color.Black.copy(alpha = 0.35f))
         )
 
-        Column(modifier = Modifier.fillMaxSize()) {
+        // imePadding() — на ВЕСЬ столбец разговора (а не только на строку
+        // ввода, как было раньше). Так список сообщений (weight = 1f) сам
+        // сжимается, когда появляется клавиатура, и поле ввода оказывается
+        // сразу над клавиатурой без зазора — как в Telegram, а не поднимается
+        // высоко над ней с пустым местом.
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding()
+        ) {
             // Верхняя панель
             Row(
                 modifier = Modifier
@@ -127,12 +149,14 @@ fun ChatScreen(
                 }
             }
 
-            // Поле ввода
+            // Поле ввода — navigationBarsPadding() тут отвечает только за
+            // случай закрытой клавиатуры (безопасный отступ от системной
+            // навигации), клавиатуру целиком обрабатывает imePadding() на
+            // Column выше.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
-                    .imePadding()
                     .padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -155,6 +179,7 @@ fun ChatScreen(
                         cursorColor = AccentColor
                     ),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                    keyboardActions = KeyboardActions(onSend = { trySend() }),
                     maxLines = 4
                 )
 
@@ -165,11 +190,7 @@ fun ChatScreen(
                         .clip(CircleShape)
                         .background(if (canSend) AccentColor.copy(alpha = 0.85f) else Color.White.copy(alpha = 0.15f))
                         .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
-                        .clickable(enabled = canSend) {
-                            val text = input
-                            input = ""
-                            scope.launch { viewModel.sendMessage(text) }
-                        },
+                        .clickable(enabled = canSend) { trySend() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -205,10 +226,10 @@ private fun ChatBubble(message: ChatUiMessage) {
                 .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
             // MarkdownText вместо обычного Text — тот же рендерер, что и в
-            // "Мат. основе" темы, поэтому формулы из ответа GigaChat отображаются
-            // тем же, уже проверенным способом. normalizeChatMath() приводит
-            // разные обозначения LaTeX из ответа к единому блочному формату,
-            // который умеет рендерить MarkdownText (см. ChatMathFormat.kt).
+            // "Мат. основе" темы, поэтому формулы из ответа GigaChat
+            // отображаются корректно. normalizeChatMath() приводит разные
+            // обозначения LaTeX из ответа к единому блочному формату
+            // (см. ChatMathFormat.kt).
             MarkdownText(
                 markdown = normalizeChatMath(message.text),
                 textColor = Color.White,

@@ -124,7 +124,7 @@ private fun MainMenuContent(
                     .padding(top = 28.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
-                PulsingTitleChip(text = "Классические алгоритмы ML")
+                PulsingTitleChip(text = "Классические алгоритмы")
             }
         }
 
