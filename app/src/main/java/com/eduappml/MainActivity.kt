@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
-import android.view.Window
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,16 +24,15 @@ class MainActivity : ComponentActivity() {
         applyThemeByMode()
         super.onCreate(savedInstanceState)
 
-        // Принудительно убираем системный заголовок/ActionBar с именем
-        // приложения — той самой белой "шторки" сверху. Раньше рассчитывали
-        // только на то, что тема (обычная/сплэш/ночная) сама не будет его
-        // рисовать (windowNoTitle/windowActionBar в XML), но при переключении
-        // между несколькими темами в манифесте/values/values-night эта
-        // настройка легко теряется по цепочке наследования. Гасим его здесь
-        // явно в коде — так гарантированно не появится, независимо от того,
-        // какая тема реально применилась к активности.
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
-        actionBar?.hide()
+        // ВАЖНО: отключение ActionBar/title теперь сделано в самой теме
+        // (Theme.EduAppML.Splash в themes.xml), а не здесь в коде. Раньше
+        // тут стояли requestWindowFeature(Window.FEATURE_NO_TITLE) и
+        // actionBar?.hide() — они не работали и были убраны: окно уже
+        // фиксирует набор фич (в том числе ActionBar) в момент создания,
+        // на основе темы, ДО того как выполнится этот код — пытаться
+        // отключить фичу отсюда было равносильно закрывать дверь после
+        // того, как через неё уже прошли. Единственное надёжное место —
+        // сама тема, до создания окна.
 
         // Рисуем контент под системными барами
         WindowCompat.setDecorFitsSystemWindows(window, false)

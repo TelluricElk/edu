@@ -110,7 +110,9 @@ fun SplashForeground(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 36.dp, start = 16.dp, end = 16.dp),
+                // top был 36.dp — чуть увеличен, чтобы шапка не липла к самому
+                // верху экрана (только визуальный отступ, чуть-чуть).
+                .padding(top = 46.dp, start = 16.dp, end = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {

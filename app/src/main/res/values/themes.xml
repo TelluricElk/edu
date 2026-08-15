@@ -21,10 +21,21 @@
         <item name="android:enforceNavigationBarContrast">false</item>
     </style>
 
-    <!-- Системный Splash (Android 12+) -->
+    <!-- Системный Splash (Android 12+). ВАЖНО: наследуется от библиотечной
+         Theme.SplashScreen, а НЕ от Theme.EduAppML выше — поэтому
+         windowActionBar/windowNoTitle оттуда сюда не наследуются
+         автоматически и должны быть продублированы явно здесь. Раз
+         MainActivity — единственная Activity на всё приложение (остальные
+         экраны — это Compose-навигация внутри неё), фича ActionBar
+         фиксируется окном именно в момент создания под этой темой, до
+         срабатывания кода в onCreate() — отключать её через код в
+         requestWindowFeature() уже поздно, окно её проигнорирует. Только
+         отключение здесь, в самой теме, до создания окна, реально работает. -->
     <style name="Theme.EduAppML.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@android:color/black</item>
         <item name="postSplashScreenTheme">@style/Theme.EduAppML</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
 </resources>

@@ -121,7 +121,9 @@ private fun MainMenuContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 28.dp),
+                    // top был 28.dp — чуть увеличен, чтобы чип не липнул к
+                    // самому верху экрана (небольшой визуальный отступ).
+                    .padding(top = 38.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
                 PulsingTitleChip(text = "Классические алгоритмы")
