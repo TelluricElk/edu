@@ -1,0 +1,157 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.eduappml"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+7-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:7:5-9:41
+8        android:minSdkVersion="24"
+8-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:8:9-35
+9        android:targetSdkVersion="35" />
+9-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:9:9-38
+10
+11    <!-- Разрешение на доступ к интернету (нужно для загрузки KaTeX с CDN) -->
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:12:5-67
+12-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:12:22-64
+13
+14    <permission
+14-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:14:5-16:47
+15        android:name="com.eduappml.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+15-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:15:9-77
+16        android:protectionLevel="signature" />
+16-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:16:9-44
+17
+18    <uses-permission android:name="com.eduappml.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+18-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:18:5-93
+18-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:18:22-90
+19
+20    <application
+20-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:20:5-86:19
+21        android:allowBackup="true"
+21-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:21:9-35
+22        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+22-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:22:9-77
+23        android:debuggable="true"
+24        android:extractNativeLibs="false"
+24-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:24:9-42
+25        android:icon="@mipmap/ic_launcher"
+25-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:25:9-43
+26        android:label="@string/app_name"
+26-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:26:9-41
+27        android:roundIcon="@mipmap/ic_launcher_round"
+27-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:27:9-54
+28        android:supportsRtl="true"
+28-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:28:9-35
+29        android:testOnly="true"
+30        android:theme="@style/Theme.EduAppML"
+30-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:30:9-46
+31        android:usesCleartextTraffic="true" >
+31-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:31:9-44
+32        <activity
+32-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:32:9-43:20
+33            android:name="com.eduappml.MainActivity"
+33-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:33:13-53
+34            android:configChanges="uiMode|screenLayout|screenSize|orientation"
+34-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:34:13-79
+35            android:exported="true"
+35-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:35:13-36
+36            android:theme="@style/Theme.EduAppML.Splash"
+36-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:36:13-57
+37            android:windowSoftInputMode="adjustResize" >
+37-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:37:13-55
+38            <intent-filter>
+38-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:38:13-42:29
+39                <action android:name="android.intent.action.MAIN" />
+39-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:39:17-69
+39-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:39:25-66
+40
+41                <category android:name="android.intent.category.LAUNCHER" />
+41-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:41:17-77
+41-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:41:27-74
+42            </intent-filter>
+43        </activity>
+44        <activity
+44-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:44:9-46:39
+45            android:name="androidx.compose.ui.tooling.PreviewActivity"
+45-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:45:13-71
+46            android:exported="true" />
+46-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:46:13-36
+47
+48        <provider
+48-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:48:9-61:20
+49            android:name="androidx.startup.InitializationProvider"
+49-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:49:13-67
+50            android:authorities="com.eduappml.androidx-startup"
+50-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:50:13-64
+51            android:exported="false" >
+51-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:51:13-37
+52            <meta-data
+52-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:52:13-54:52
+53                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+53-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:53:17-75
+54                android:value="androidx.startup" />
+54-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:54:17-49
+55            <meta-data
+55-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:55:13-57:52
+56                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+56-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:56:17-78
+57                android:value="androidx.startup" />
+57-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:57:17-49
+58            <meta-data
+58-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:58:13-60:52
+59                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+59-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:59:17-85
+60                android:value="androidx.startup" />
+60-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:60:17-49
+61        </provider>
+62        <provider
+62-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:62:9-65:40
+63            android:name="ru.noties.jlatexmath.JLatexMathInitProvider"
+63-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:63:13-71
+64            android:authorities="com.eduappml.jlatexmathinitprovider"
+64-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:64:13-70
+65            android:exported="false" />
+65-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:65:13-37
+66
+67        <receiver
+67-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:67:9-85:20
+68            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+68-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:68:13-76
+69            android:directBootAware="false"
+69-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:69:13-44
+70            android:enabled="true"
+70-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:70:13-35
+71            android:exported="true"
+71-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:71:13-36
+72            android:permission="android.permission.DUMP" >
+72-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:72:13-57
+73            <intent-filter>
+73-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:73:13-75:29
+74                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+74-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:74:17-91
+74-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:74:25-88
+75            </intent-filter>
+76            <intent-filter>
+76-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:76:13-78:29
+77                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+77-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:77:17-85
+77-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:77:25-82
+78            </intent-filter>
+79            <intent-filter>
+79-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:79:13-81:29
+80                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+80-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:80:17-88
+80-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:80:25-85
+81            </intent-filter>
+82            <intent-filter>
+82-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:82:13-84:29
+83                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+83-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:83:17-95
+83-->C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\AndroidManifest.xml:83:25-92
+84            </intent-filter>
+85        </receiver>
+86    </application>
+87
+88</manifest>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <!-- Градиент под ваш основной фон (направление сверху вниз: angle=270) -->
+            <gradient
+                android:startColor="#3A0CA3"
+                android:centerColor="#4361EE"
+                android:endColor="#B5179E"
+                android:angle="270" />
+        </shape>
+    </item>
+</layer-list>

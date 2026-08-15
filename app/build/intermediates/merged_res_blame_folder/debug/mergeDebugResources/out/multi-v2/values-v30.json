@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.eduappml.app-mergeDebugResources-62:/values-v30/values-v30.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\sasaa\\.gradle\\caches\\8.13\\transforms\\f4d7d10ec932b16ccaeb6ecb18dd7a6f\\transformed\\jetified-material3-release\\res\\values-v30\\values-v30.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "72",
+                        "endOffsets": "123"
+                    }
+                }
+            ]
+        }
+    ]
+}

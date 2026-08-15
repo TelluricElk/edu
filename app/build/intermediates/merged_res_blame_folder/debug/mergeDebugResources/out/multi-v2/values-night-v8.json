@@ -1,0 +1,96 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.eduappml.app-mergeDebugResources-62:/values-night-v8/values-night-v8.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\sasaa\\.gradle\\caches\\8.13\\transforms\\84b2fd3a1abfaae24aaa2fd271449a3f\\transformed\\jetified-core-splashscreen-1.0.1\\res\\values-night-v8\\values-night-v8.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "85",
+                        "endOffsets": "136"
+                    },
+                    "to": {
+                        "startLines": "8",
+                        "startColumns": "4",
+                        "startOffsets": "361",
+                        "endColumns": "85",
+                        "endOffsets": "442"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\sasaa\\yurovskiy\\kozlov\\EduAppML v.19\\app\\src\\main\\res\\values-night\\themes.xml",
+                    "from": {
+                        "startLines": "32,2",
+                        "startColumns": "4,4",
+                        "startOffsets": "1314,17",
+                        "endLines": "35,29",
+                        "endColumns": "12,12",
+                        "endOffsets": "1537,1264"
+                    },
+                    "to": {
+                        "startLines": "9,20",
+                        "startColumns": "4,4",
+                        "startOffsets": "447,1307",
+                        "endLines": "12,47",
+                        "endColumns": "12,12",
+                        "endOffsets": "670,2231"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\sasaa\\.gradle\\caches\\8.13\\transforms\\ee73834a3294df1efe48f71854d29a9c\\transformed\\appcompat-1.6.1\\res\\values-night-v8\\values-night-v8.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,125,209,293,389,491,593,687",
+                        "endColumns": "69,83,83,95,101,101,93,88",
+                        "endOffsets": "120,204,288,384,486,588,682,771"
+                    },
+                    "to": {
+                        "startLines": "13,14,15,16,17,18,19,74",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "675,745,829,913,1009,1111,1213,5124",
+                        "endColumns": "69,83,83,95,101,101,93,88",
+                        "endOffsets": "740,824,908,1004,1106,1208,1302,5208"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\sasaa\\.gradle\\caches\\8.13\\transforms\\a34bd5b96fc900f304ef0a35e3a37fcc\\transformed\\material-1.12.0\\res\\values-night-v8\\values-night-v8.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,130,241,330,431,538,645,744,851,954,1081,1169,1293,1395,1497,1613,1715,1829,1957,2073,2195,2331,2451,2585,2705,2817,2943,3060,3184,3314,3436,3574,3708,3824",
+                        "endColumns": "74,110,88,100,106,106,98,106,102,126,87,123,101,101,115,101,113,127,115,121,135,119,133,119,111,125,116,123,129,121,137,133,115,119",
+                        "endOffsets": "125,236,325,426,533,640,739,846,949,1076,1164,1288,1390,1492,1608,1710,1824,1952,2068,2190,2326,2446,2580,2700,2812,2938,3055,3179,3309,3431,3569,3703,3819,3939"
+                    },
+                    "to": {
+                        "startLines": "48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,75,76,77,78,79,80,81,82",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "2236,2311,2422,2511,2612,2719,2826,2925,3032,3135,3262,3350,3474,3576,3678,3794,3896,4010,4138,4254,4376,4512,4632,4766,4886,4998,5213,5330,5454,5584,5706,5844,5978,6094",
+                        "endColumns": "74,110,88,100,106,106,98,106,102,126,87,123,101,101,115,101,113,127,115,121,135,119,133,119,111,125,116,123,129,121,137,133,115,119",
+                        "endOffsets": "2306,2417,2506,2607,2714,2821,2920,3027,3130,3257,3345,3469,3571,3673,3789,3891,4005,4133,4249,4371,4507,4627,4761,4881,4993,5119,5325,5449,5579,5701,5839,5973,6089,6209"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\sasaa\\yurovskiy\\kozlov\\EduAppML v.19\\app\\src\\main\\res\\values-night\\colors.xml",
+                    "from": {
+                        "startLines": "6,2,7,3,4,5",
+                        "startColumns": "4,4,4,4,4,4",
+                        "startOffsets": "264,57,311,108,156,209",
+                        "endColumns": "45,49,56,46,51,53",
+                        "endOffsets": "305,102,363,150,203,258"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7",
+                        "startColumns": "4,4,4,4,4,4",
+                        "startOffsets": "55,101,151,208,255,307",
+                        "endColumns": "45,49,56,46,51,53",
+                        "endOffsets": "96,146,203,250,302,356"
+                    }
+                }
+            ]
+        }
+    ]
+}
