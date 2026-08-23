@@ -29,5 +29,7 @@
     <style name="Theme.EduAppML.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@android:color/black</item>
         <item name="postSplashScreenTheme">@style/Theme.EduAppML</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 </resources>

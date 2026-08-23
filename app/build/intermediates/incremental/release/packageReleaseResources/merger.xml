@@ -19,6 +19,8 @@
     </style><style name="Theme.EduAppML.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@android:color/black</item>
         <item name="postSplashScreenTheme">@style/Theme.EduAppML</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
     </style></file><file path="C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\res\values-night\colors.xml" qualifiers="night-v8"><color name="background_dark">#121212</color><color name="surface_dark">#1E1E1E</color><color name="text_primary_dark">#FFFFFF</color><color name="text_secondary_dark">#B3B3B3</color><color name="accent_dark">#BB86FC</color><color name="button_background_dark">#3700B3</color></file><file path="C:\Users\sasaa\yurovskiy\kozlov\EduAppML v.19\app\src\main\res\values-night\themes.xml" qualifiers="night-v8"><style name="Theme.EduAppML" parent="Theme.Material3.DayNight.NoActionBar">
         
         <item name="android:windowBackground">@color/background_dark</item>

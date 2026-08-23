@@ -8,29 +8,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.eduappml.ui.ae.AeResult
-import com.eduappml.ui.cnn.CnnResult
+import com.eduappml.ui.ae.AeResultMilitary
+import com.eduappml.ui.cnn.CnnResultMilitary
 import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.buildResultChatPrompt
-import com.eduappml.ui.dm.DmResult
-import com.eduappml.ui.dt.DtResult
-import com.eduappml.ui.fc.FcResult
-import com.eduappml.ui.gan.GanResult
-import com.eduappml.ui.gb.GbResult
-import com.eduappml.ui.gnn.GnnResult
-import com.eduappml.ui.km.KmResult
+import com.eduappml.ui.dm.DmResultMilitary
+import com.eduappml.ui.dt.DtResultMilitary
+import com.eduappml.ui.fc.FcResultMilitary
+import com.eduappml.ui.gan.GanResultMilitary
+import com.eduappml.ui.gb.GbResultMilitary
+import com.eduappml.ui.gnn.GnnResultMilitary
+import com.eduappml.ui.km.KmResultMilitary
 import com.eduappml.ui.knn.KnnLab
+import com.eduappml.ui.knn.KnnResultMilitary
 import com.eduappml.ui.common.QuizSection
-import com.eduappml.ui.logr.LogrResult
-import com.eduappml.ui.lr.LrResult
-import com.eduappml.ui.nb.NbResult
-import com.eduappml.ui.rf.RfResult
-import com.eduappml.ui.rl.RlResult
-import com.eduappml.ui.rnn.RnnResult
-import com.eduappml.ui.som.SomResult
-import com.eduappml.ui.svm.SvmResult
-import com.eduappml.ui.tr.TrResult
+import com.eduappml.ui.logr.LogrResultMilitary
+import com.eduappml.ui.lr.LrResultMilitary
+import com.eduappml.ui.nb.NbResultMilitary
+import com.eduappml.ui.rf.RfResultMilitary
+import com.eduappml.ui.rl.RlResultMilitary
+import com.eduappml.ui.rnn.RnnResultMilitary
+import com.eduappml.ui.som.SomResultMilitary
+import com.eduappml.ui.svm.SvmResultMilitary
+import com.eduappml.ui.tr.TrResultMilitary
 import kotlin.math.roundToInt
 
 /**
@@ -40,6 +41,15 @@ import kotlin.math.roundToInt
  *
  * [onOpenChat] — колбэк для кнопки "Почему получился именно такой результат"
  * (см. аналогичный параметр в MathScreen.kt) — прокидывается в каждую тему.
+ *
+ * Военный контент: темы "knn", "lr" и "logr" сейчас диспетчеризуются на
+ * *ResultMilitary-варианты (KnnResultMilitary, LrResultMilitary,
+ * LogrResultMilitary) — отдельные публичные composable-файлы в пакетах
+ * com.eduappml.ui.knn, com.eduappml.ui.lr и com.eduappml.ui.logr. Старый
+ * приватный KnnResult/knnQuiz ниже в этом же файле и старые файлы
+ * LrResult.kt/LogrResult.kt остаются нетронутыми, но больше не вызываются
+ * ни для одной темы — это сознательный выбор (см. обсуждение с владельцем
+ * проекта), а не забытый код.
  */
 @Composable
 fun ResultScreen(
@@ -50,25 +60,25 @@ fun ResultScreen(
     onOpenChat: (String) -> Unit = {}
 ) {
     when (id) {
-        "knn" -> KnnResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "lr" -> LrResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "logr" -> LogrResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "svm" -> SvmResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "dt" -> DtResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "nb" -> NbResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "rf" -> RfResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "gb" -> GbResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "km" -> KmResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "fc" -> FcResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "som" -> SomResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "rl" -> RlResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "ae" -> AeResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "gan" -> GanResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "cnn" -> CnnResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "rnn" -> RnnResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "gnn" -> GnnResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "tr" -> TrResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
-        "dm" -> DmResult(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "knn" -> KnnResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "lr" -> LrResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "logr" -> LogrResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "svm" -> SvmResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "dt" -> DtResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "nb" -> NbResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "rf" -> RfResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "gb" -> GbResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "km" -> KmResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "fc" -> FcResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "som" -> SomResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "rl" -> RlResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "ae" -> AeResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "gan" -> GanResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "cnn" -> CnnResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "rnn" -> RnnResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "gnn" -> GnnResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "tr" -> TrResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
+        "dm" -> DmResultMilitary(modifier = modifier, title = title, onBack = onBack, onOpenChat = onOpenChat)
         else -> ComingSoonResult(modifier = modifier, title = title, id = id, onBack = onBack)
     }
 }
@@ -90,6 +100,13 @@ private fun ComingSoonResult(modifier: Modifier = Modifier, title: String?, id: 
         )
     }
 }
+
+// ---------------------------------------------------------------------
+// Ниже — исходная (гражданская) реализация решения k-NN. С момента
+// подключения KnnResultMilitary в диспетчере выше эти функции больше не
+// вызываются ни из одного места в приложении, но намеренно оставлены как
+// есть: код никуда не делся, просто стал недостижим.
+// ---------------------------------------------------------------------
 
 private val knnQuiz = listOf(
     com.eduappml.ui.common.QuizQuestion(

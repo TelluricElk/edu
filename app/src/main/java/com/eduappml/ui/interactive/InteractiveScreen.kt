@@ -22,30 +22,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.eduappml.ui.ae.AeInteractive
-import com.eduappml.ui.cnn.CnnInteractive
+import com.eduappml.ui.ae.AeInteractiveMilitary
+import com.eduappml.ui.cnn.CnnInteractiveMilitary
 import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.buildInteractiveChatPrompt
-import com.eduappml.ui.dm.DmInteractive
-import com.eduappml.ui.dt.DtInteractive
-import com.eduappml.ui.fc.FcInteractive
-import com.eduappml.ui.gan.GanInteractive
-import com.eduappml.ui.gb.GbInteractive
-import com.eduappml.ui.gnn.GnnInteractive
-import com.eduappml.ui.km.KmInteractive
+import com.eduappml.ui.dm.DmInteractiveMilitary
+import com.eduappml.ui.dt.DtInteractiveMilitary
+import com.eduappml.ui.fc.FcInteractiveMilitary
+import com.eduappml.ui.gan.GanInteractiveMilitary
+import com.eduappml.ui.gb.GbInteractiveMilitary
+import com.eduappml.ui.gnn.GnnInteractiveMilitary
+import com.eduappml.ui.km.KmInteractiveMilitary
+import com.eduappml.ui.knn.KnnInteractiveMilitary
 import com.eduappml.ui.knn.KnnLab
 import com.eduappml.ui.knn.KnnMetric
 import com.eduappml.ui.knn.KnnWeighting
-import com.eduappml.ui.logr.LogrInteractive
-import com.eduappml.ui.lr.LrInteractive
-import com.eduappml.ui.nb.NbInteractive
-import com.eduappml.ui.rf.RfInteractive
-import com.eduappml.ui.rl.RlInteractive
-import com.eduappml.ui.rnn.RnnInteractive
-import com.eduappml.ui.som.SomInteractive
-import com.eduappml.ui.svm.SvmInteractive
-import com.eduappml.ui.tr.TrInteractive
+import com.eduappml.ui.logr.LogrInteractiveMilitary
+import com.eduappml.ui.lr.LrInteractiveMilitary
+import com.eduappml.ui.nb.NbInteractiveMilitary
+import com.eduappml.ui.rf.RfInteractiveMilitary
+import com.eduappml.ui.rl.RlInteractiveMilitary
+import com.eduappml.ui.rnn.RnnInteractiveMilitary
+import com.eduappml.ui.som.SomInteractiveMilitary
+import com.eduappml.ui.svm.SvmInteractiveMilitary
+import com.eduappml.ui.tr.TrInteractiveMilitary
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -57,6 +58,15 @@ import kotlin.math.roundToInt
  * [onOpenChat] — колбэк для кнопки "объяснить" рядом с текущим результатом:
  * пользователь подвигал ползунки, получил результат и может спросить у
  * Edu.AI, почему именно так — см. аналогичный параметр в ResultScreen.kt.
+ *
+ * Военный контент: темы "knn", "lr" и "logr" сейчас диспетчеризуются на
+ * *Military-варианты (KnnInteractiveMilitary, LrInteractiveMilitary,
+ * LogrInteractiveMilitary) — отдельные публичные composable-файлы в
+ * пакетах com.eduappml.ui.knn, com.eduappml.ui.lr и com.eduappml.ui.logr.
+ * Старые приватные KnnInteractive/KnnCanvas ниже в этом же файле и старые
+ * файлы LrInteractive.kt/LogrInteractive.kt остаются нетронутыми, но
+ * больше не вызываются ни для одной темы — это сознательный выбор
+ * (см. обсуждение с владельцем проекта), а не забытый код.
  */
 @Composable
 fun InteractiveScreen(
@@ -69,25 +79,25 @@ fun InteractiveScreen(
     onOpenChat: (String) -> Unit = {}
 ) {
     when (id) {
-        "knn" -> KnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "lr" -> LrInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "logr" -> LogrInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "svm" -> SvmInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "dt" -> DtInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "nb" -> NbInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "rf" -> RfInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "gb" -> GbInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "km" -> KmInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "fc" -> FcInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "som" -> SomInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "rl" -> RlInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "ae" -> AeInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "gan" -> GanInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "cnn" -> CnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "rnn" -> RnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "gnn" -> GnnInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "tr" -> TrInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
-        "dm" -> DmInteractive(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "knn" -> KnnInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "lr" -> LrInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "logr" -> LogrInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "svm" -> SvmInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "dt" -> DtInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "nb" -> NbInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "rf" -> RfInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "gb" -> GbInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "km" -> KmInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "fc" -> FcInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "som" -> SomInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "rl" -> RlInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "ae" -> AeInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "gan" -> GanInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "cnn" -> CnnInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "rnn" -> RnnInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "gnn" -> GnnInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "tr" -> TrInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
+        "dm" -> DmInteractiveMilitary(modifier = modifier, title = title, onBack = onBack, onNext = onNext, onOpenChat = onOpenChat)
         else -> ComingSoonInteractive(modifier = modifier, title = title, id = id, onBack = onBack, onNext = onNext)
     }
 }
@@ -122,6 +132,13 @@ private fun ComingSoonInteractive(
         )
     }
 }
+
+// ---------------------------------------------------------------------
+// Ниже — исходная (гражданская) реализация интерактива k-NN. С момента
+// подключения KnnInteractiveMilitary в диспетчере выше эти функции больше
+// не вызываются ни из одного места в приложении, но намеренно оставлены
+// как есть: код никуда не делся, просто стал недостижим.
+// ---------------------------------------------------------------------
 
 @Composable
 private fun KnnInteractive(
