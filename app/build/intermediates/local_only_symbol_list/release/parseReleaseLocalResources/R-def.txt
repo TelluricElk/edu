@@ -1,5 +1,6 @@
 R_DEF: Internal format may change without notice
 local
+bool portrait_only
 color accent_dark
 color background_dark
 color button_background_dark
