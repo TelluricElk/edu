@@ -88,7 +88,7 @@ fun KnnResultMilitary(modifier: Modifier = Modifier, title: String?, onBack: () 
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = knnQuizMilitary, textColor = textColor)
+        QuizSection(questions = knnQuizMilitary, textColor = textColor, nodeId = "knn")
     }
 }
 

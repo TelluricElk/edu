@@ -119,6 +119,6 @@ fun RnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit,
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = rnnQuiz, textColor = textColor)
+        QuizSection(questions = rnnQuiz, textColor = textColor, nodeId = "rnn")
     }
 }

@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 @Composable
 fun SvmInteractive(
@@ -202,20 +203,20 @@ private fun SvmCanvas(model: SvmLab.Model) {
                 }
                 val dashed = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(14f, 10f))
                 val (b1, b2) = pointsFor(0f)
-                drawLine(Color.White, b1, b2, strokeWidth = 2.5f)
+                drawLine(Color.White, b1, b2, strokeWidth = designPx(2.5f))
                 val (m1a, m1b) = pointsFor(1f)
-                drawLine(Color.White.copy(alpha = 0.55f), m1a, m1b, strokeWidth = 1.5f, pathEffect = dashed)
+                drawLine(Color.White.copy(alpha = 0.55f), m1a, m1b, strokeWidth = designPx(1.5f), pathEffect = dashed)
                 val (m2a, m2b) = pointsFor(-1f)
-                drawLine(Color.White.copy(alpha = 0.55f), m2a, m2b, strokeWidth = 1.5f, pathEffect = dashed)
+                drawLine(Color.White.copy(alpha = 0.55f), m2a, m2b, strokeWidth = designPx(1.5f), pathEffect = dashed)
             }
         }
 
         SvmLab.trainSet.forEachIndexed { idx, p ->
             val pt = toPx(p.x1, p.x2)
             val color = if (p.label == 1) Color(0xFF4D96FF) else Color(0xFFFF914D)
-            drawCircle(color, radius = 6f, center = pt)
+            drawCircle(color, radius = designPx(6f), center = pt)
             if (model.alpha[idx] != 0f) {
-                drawCircle(Color.White, radius = 10f, center = pt, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.6f))
+                drawCircle(Color.White, radius = designPx(10f), center = pt, style = androidx.compose.ui.graphics.drawscope.Stroke(width = designPx(1.6f)))
             }
         }
     }

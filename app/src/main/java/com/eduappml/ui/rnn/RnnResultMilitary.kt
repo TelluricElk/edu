@@ -124,6 +124,6 @@ fun RnnResultMilitary(modifier: Modifier = Modifier, title: String?, onBack: () 
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = rnnQuizMilitary, textColor = textColor)
+        QuizSection(questions = rnnQuizMilitary, textColor = textColor, nodeId = "rnn")
     }
 }

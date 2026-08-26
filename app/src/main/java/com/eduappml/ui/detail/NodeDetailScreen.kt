@@ -23,12 +23,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.hypot
 
+import com.eduappml.ui.common.designPx
 import com.eduappml.ui.menu.EdgeSpec
 
 @Composable
@@ -102,10 +104,6 @@ fun NodeDetailScreen(
         }
     )
 
-    val mainSize = 100.dp
-    val childSize = 56.dp
-    val orbitRadius = 140.dp
-
     // ЕДИНЫЙ источник углов — считается один раз и используется и для линий на Canvas,
     // и для расположения самих пузырей. Раньше угол вычислялся отдельно в двух местах
     // (здесь и внутри Canvas) — математически идентично, но два независимых вычисления
@@ -114,18 +112,39 @@ fun NodeDetailScreen(
         (2 * PI / children.size) * index - PI / 2
     }
 
-    val childPositions = childAngles.map { angle ->
-        val x = orbitRadius * cos(angle).toFloat()
-        val y = orbitRadius * sin(angle).toFloat()
-        Pair(x, y)
-    }
-
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
             .clickable { onBack() },
         contentAlignment = Alignment.Center
     ) {
+        // Раньше три размера были прибиты гвоздями: mainSize = 100.dp,
+        // childSize = 56.dp, orbitRadius = 140.dp. Суммарный габарит «созвездия»
+        // получался 2 * (140 + 28) = 336dp — на телефоне шириной 320dp крайние
+        // спутники обрезались краем экрана, а на планшете вся конструкция
+        // превращалась в крошечный островок посреди пустоты.
+        //
+        // Теперь орбита считается от МЕНЬШЕЙ стороны доступной области, а размеры
+        // пузырей — от орбиты. Коэффициент 0.389 подобран так, чтобы на эталонном
+        // телефоне (меньшая сторона 360dp) получалось ровно прежние 140dp: на
+        // привычном устройстве экран выглядит в точности как раньше.
+        val shortSide = min(maxWidth, maxHeight)
+        val orbitRadius = (shortSide * 0.389f).coerceIn(104.dp, 240.dp)
+        val mainSize = orbitRadius * 0.714f              // 140dp -> 100dp
+        val childSize = orbitRadius * 0.40f              // 140dp ->  56dp
+        val childIconSize = childSize * 0.5f             //  56dp ->  28dp
+        val mainFontSize = (mainSize.value * 0.24f).sp   // 100dp ->  24sp
+
+        // Тем же коэффициентом масштабируется отрисовка на Canvas — иначе линии
+        // и импульсы остались бы телефонными на выросшей вдвое орбите.
+        val gfxScale = orbitRadius / 140.dp
+
+        val childPositions = childAngles.map { angle ->
+            val x = orbitRadius * cos(angle).toFloat()
+            val y = orbitRadius * sin(angle).toFloat()
+            Pair(x, y)
+        }
+
         Canvas(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -148,16 +167,21 @@ fun NodeDetailScreen(
                 // антиалиасингом ровно по границе пиксельной сетки и становиться
                 // почти невидимой на пёстром фоне — с бóльшим запасом по толщине
                 // и яркости такого свести к нулю уже не получится.
+                //
+                // designPx() добавлен поверх: сама по себе «толщина 4» — это
+                // четыре ПИКСЕЛЯ, то есть на плотном экране физически втрое
+                // тоньше, чем на редком. Обёртка сохраняет подобранный вид на
+                // эталонном устройстве и повторяет его на всех остальных.
                 drawLine(
                     color = Color.White.copy(alpha = 0.32f),
                     start = start,
                     end = end,
-                    strokeWidth = 4f
+                    strokeWidth = designPx(4f) * gfxScale
                 )
 
-                val speedPxPerSec = 150f
+                val speedPxPerSec = designPx(150f) * gfxScale
                 val pulsesPerEdge = 2
-                val pulseRadiusBase = 5f
+                val pulseRadiusBase = designPx(5f) * gfxScale
                 val pulseGlow = 1.8f
                 val coreColor = Color.White.copy(alpha = 0.90f)
                 val glowColor = Color.White.copy(alpha = 0.20f)
@@ -212,11 +236,11 @@ fun NodeDetailScreen(
                         color = Color.White.copy(alpha = 0.45f),
                         radius = radius,
                         center = center,
-                        style = Stroke(width = 3f)
+                        style = Stroke(width = designPx(3f) * gfxScale)
                     )
                     drawCircle(
                         color = Color.White.copy(alpha = 0.18f),
-                        radius = (radius - 6f).coerceAtLeast(0f),
+                        radius = (radius - designPx(6f) * gfxScale).coerceAtLeast(0f),
                         center = center
                     )
                 }
@@ -229,7 +253,7 @@ fun NodeDetailScreen(
             Text(
                 text = nodeLabel,
                 color = Color.White,
-                fontSize = 24.sp,
+                fontSize = mainFontSize,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -254,7 +278,7 @@ fun NodeDetailScreen(
                     imageVector = child.icon,
                     contentDescription = null,
                     tint = Color.White.copy(alpha = 0.8f),
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(childIconSize)
                 )
             }
         }

@@ -8,6 +8,7 @@ color surface_dark
 color text_primary_dark
 color text_secondary_dark
 drawable bg_gradient_dark
+drawable emblem_krasnodar
 drawable ic_launcher_background
 drawable ic_launcher_foreground
 drawable splash_background

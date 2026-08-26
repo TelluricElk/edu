@@ -22,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 import kotlin.random.Random
+import com.eduappml.ui.common.designPx
 
 private const val DISPLAY_RANGE = 8f // координаты данных от -8 до 8
 
@@ -144,10 +145,10 @@ private fun ForwardCanvas(original: Point2D, noisy: Point2D) {
         val h = size.height
         fun toPx(p: Point2D) = Offset((p.x / DISPLAY_RANGE + 1f) / 2f * w, h - (p.y / DISPLAY_RANGE + 1f) / 2f * h)
 
-        DmLab.realSample.forEach { p -> drawCircle(Color.White.copy(alpha = 0.10f), radius = 3f, center = toPx(p)) }
-        drawLine(Color.White.copy(alpha = 0.4f), toPx(original), toPx(noisy), strokeWidth = 1.5f)
-        drawCircle(Color(0xFF6BCB77), radius = 7f, center = toPx(original))
-        drawCircle(Color(0xFF9D4EDD), radius = 8f, center = toPx(noisy))
+        DmLab.realSample.forEach { p -> drawCircle(Color.White.copy(alpha = 0.10f), radius = designPx(3f), center = toPx(p)) }
+        drawLine(Color.White.copy(alpha = 0.4f), toPx(original), toPx(noisy), strokeWidth = designPx(1.5f))
+        drawCircle(Color(0xFF6BCB77), radius = designPx(7f), center = toPx(original))
+        drawCircle(Color(0xFF9D4EDD), radius = designPx(8f), center = toPx(noisy))
     }
 }
 
@@ -158,7 +159,7 @@ private fun ReverseCanvas(samples: List<Point2D>) {
         val h = size.height
         fun toPx(x: Float, y: Float) = Offset((x / DISPLAY_RANGE + 1f) / 2f * w, h - (y / DISPLAY_RANGE + 1f) / 2f * h)
 
-        DmLab.realSample.forEach { p -> drawCircle(Color.White.copy(alpha = 0.12f), radius = 3.5f, center = toPx(p.x, p.y)) }
-        samples.forEach { p -> drawCircle(Color(0xFF9D4EDD), radius = 4f, center = toPx(p.x, p.y)) }
+        DmLab.realSample.forEach { p -> drawCircle(Color.White.copy(alpha = 0.12f), radius = designPx(3.5f), center = toPx(p.x, p.y)) }
+        samples.forEach { p -> drawCircle(Color(0xFF9D4EDD), radius = designPx(4f), center = toPx(p.x, p.y)) }
     }
 }

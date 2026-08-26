@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.eduappml.ui.common.AskChatButton
 import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.buildInteractiveChatPrompt
+import com.eduappml.ui.common.designPx
 
 /**
  * Военный вариант экрана "Интерактив" для темы наивного Байеса: та же
@@ -223,7 +224,7 @@ private fun GaussianDistributionRowMilitary(
 
                 fun drawCurve(points: List<Offset>, color: Color) {
                     for (i in 0 until points.size - 1) {
-                        drawLine(color, points[i], points[i + 1], strokeWidth = 2.5f)
+                        drawLine(color, points[i], points[i + 1], strokeWidth = designPx(2.5f))
                     }
                 }
 
@@ -232,7 +233,7 @@ private fun GaussianDistributionRowMilitary(
 
                 currentX?.let { cx ->
                     val px = ((cx - xMin) / (xMax - xMin)).coerceIn(0f, 1f) * w
-                    drawLine(Color.White.copy(alpha = 0.6f), Offset(px, 0f), Offset(px, h), strokeWidth = 1.5f)
+                    drawLine(Color.White.copy(alpha = 0.6f), Offset(px, 0f), Offset(px, h), strokeWidth = designPx(1.5f))
                 }
             }
         }
@@ -266,13 +267,13 @@ private fun NbCanvasMilitary(stats: Map<Boolean, TrainingClassStats>, query: Pai
         NbLabMilitary.trainSet.forEach { p ->
             val pt = toPx(p.temperature, p.humidity)
             val color = if (p.fieldTraining) Color(0xFFFFD93D) else Color(0xFF4D96FF)
-            drawCircle(color, radius = 5f, center = pt)
+            drawCircle(color, radius = designPx(5f), center = pt)
         }
 
         query?.let { (t, hmd) ->
             val pt = toPx(t, hmd)
-            drawCircle(Color.White, radius = 9f, center = pt, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f))
-            drawCircle(Color.Black.copy(alpha = 0.4f), radius = 9f, center = pt)
+            drawCircle(Color.White, radius = designPx(9f), center = pt, style = androidx.compose.ui.graphics.drawscope.Stroke(width = designPx(3f)))
+            drawCircle(Color.Black.copy(alpha = 0.4f), radius = designPx(9f), center = pt)
         }
     }
 }

@@ -124,6 +124,6 @@ fun TrResultMilitary(modifier: Modifier = Modifier, title: String?, onBack: () -
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = trQuizMilitary, textColor = textColor)
+        QuizSection(questions = trQuizMilitary, textColor = textColor, nodeId = "tr")
     }
 }

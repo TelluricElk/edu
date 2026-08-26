@@ -20,6 +20,7 @@ import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 private val clusterColorsMilitary = listOf(
     Color(0xFFE63946), Color(0xFF4D96FF), Color(0xFFFFD93D), Color(0xFF6BCB77),
@@ -168,14 +169,14 @@ private fun KmCanvasMilitary(state: KmLabMilitary.KMeansState) {
 
         KmLabMilitary.points.forEachIndexed { idx, p ->
             val color = clusterColorsMilitary[state.assignments.getOrElse(idx) { 0 } % clusterColorsMilitary.size]
-            drawCircle(color, radius = 5f, center = toPx(p.requestSize, p.requestFrequency))
+            drawCircle(color, radius = designPx(5f), center = toPx(p.requestSize, p.requestFrequency))
         }
 
         state.centroids.forEachIndexed { idx, c ->
             val pt = toPx(c.requestSize, c.requestFrequency)
             val color = clusterColorsMilitary[idx % clusterColorsMilitary.size]
-            drawCircle(Color.Black.copy(alpha = 0.5f), radius = 11f, center = pt)
-            drawCircle(color, radius = 9f, center = pt, style = Stroke(width = 3f))
+            drawCircle(Color.Black.copy(alpha = 0.5f), radius = designPx(11f), center = pt)
+            drawCircle(color, radius = designPx(9f), center = pt, style = Stroke(width = designPx(3f)))
         }
     }
 }
@@ -196,7 +197,7 @@ private fun ElbowCanvasMilitary(currentK: Int) {
         var prev: Offset? = null
         series.forEachIndexed { idx, v ->
             val pt = toPx(idx, v)
-            prev?.let { drawLine(Color.White.copy(alpha = 0.6f), it, pt, strokeWidth = 2f) }
+            prev?.let { drawLine(Color.White.copy(alpha = 0.6f), it, pt, strokeWidth = designPx(2f)) }
             prev = pt
             val isCurrent = (idx + 1) == currentK
             drawCircle(if (isCurrent) Color(0xFFE63946) else Color.White.copy(alpha = 0.5f), radius = if (isCurrent) 6f else 3.5f, center = pt)

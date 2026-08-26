@@ -116,6 +116,6 @@ fun RlResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, 
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = rlQuiz, textColor = textColor)
+        QuizSection(questions = rlQuiz, textColor = textColor, nodeId = "rl")
     }
 }

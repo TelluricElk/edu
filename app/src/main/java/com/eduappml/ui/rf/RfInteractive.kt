@@ -22,6 +22,7 @@ import com.eduappml.ui.dt.DtLab
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 @Composable
 fun RfInteractive(
@@ -205,7 +206,7 @@ private fun RfCanvas(forest: List<com.eduappml.ui.dt.DtNode>) {
         RfLab.trainSet.forEach { p ->
             val pt = toPx(p.age, p.income)
             val color = if (p.approved) Color(0xFF6BCB77) else Color(0xFFFF6B6B)
-            drawCircle(color, radius = 5f, center = pt)
+            drawCircle(color, radius = designPx(5f), center = pt)
         }
     }
 }

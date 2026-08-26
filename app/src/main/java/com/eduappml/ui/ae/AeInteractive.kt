@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 @Composable
 fun AeInteractive(
@@ -162,9 +163,9 @@ private fun AeCanvas(ae: AeLab.Autoencoder) {
             val recon = ae.reconstruct(p)
             val orig = toPx(p.x, p.y)
             val rec = toPx(recon.x, recon.y)
-            drawLine(Color.White.copy(alpha = 0.25f), orig, rec, strokeWidth = 1f)
-            drawCircle(Color(0xFFFF914D), radius = 5f, center = orig)
-            drawCircle(Color.White, radius = 3.5f, center = rec)
+            drawLine(Color.White.copy(alpha = 0.25f), orig, rec, strokeWidth = designPx(1f))
+            drawCircle(Color(0xFFFF914D), radius = designPx(5f), center = orig)
+            drawCircle(Color.White, radius = designPx(3.5f), center = rec)
         }
     }
 }

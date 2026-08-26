@@ -139,6 +139,6 @@ fun SomResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit,
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = somQuiz, textColor = textColor)
+        QuizSection(questions = somQuiz, textColor = textColor, nodeId = "som")
     }
 }

@@ -117,6 +117,6 @@ fun FcResultMilitary(modifier: Modifier = Modifier, title: String?, onBack: () -
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = fcQuizMilitary, textColor = textColor)
+        QuizSection(questions = fcQuizMilitary, textColor = textColor, nodeId = "fc")
     }
 }

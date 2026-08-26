@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 /**
  * Военный вариант экрана "Интерактив" для темы обучения с подкреплением:
@@ -191,10 +192,10 @@ private fun RlMazeCanvasMilitary(path: List<Pair<Int, Int>>) {
         var prev: Offset? = null
         path.forEach { p ->
             val pt = toPx(p)
-            prev?.let { drawLine(Color.White, it, pt, strokeWidth = 3f) }
+            prev?.let { drawLine(Color.White, it, pt, strokeWidth = designPx(3f)) }
             prev = pt
         }
-        path.lastOrNull()?.let { drawCircle(Color.White, radius = cell * 0.18f, center = toPx(it), style = Stroke(width = 2f)) }
+        path.lastOrNull()?.let { drawCircle(Color.White, radius = cell * 0.18f, center = toPx(it), style = Stroke(width = designPx(2f))) }
     }
 }
 
@@ -214,7 +215,7 @@ private fun RlLearningCurveCanvasMilitary(steps: List<Int>) {
         var prev: Offset? = null
         steps.forEachIndexed { idx, v ->
             val pt = toPx(idx, v)
-            prev?.let { drawLine(Color(0xFF00B4D8), it, pt, strokeWidth = 2f) }
+            prev?.let { drawLine(Color(0xFF00B4D8), it, pt, strokeWidth = designPx(2f)) }
             prev = pt
         }
     }

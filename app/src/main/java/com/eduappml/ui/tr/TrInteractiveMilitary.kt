@@ -87,7 +87,7 @@ fun TrInteractiveMilitary(
         TrLabMilitary.words.forEachIndexed { idx, w ->
             val weight = weights[selected][idx]
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 2.dp)) {
-                Text(w, color = textColor, fontSize = 13.sp, modifier = Modifier.width(90.dp))
+                Text(w, color = textColor, fontSize = 13.sp, modifier = Modifier.widthIn(min = 90.dp).padding(end = 8.dp))  // было width(90.dp): при системном увеличении шрифта подпись обрезалась
                 Box(
                     modifier = Modifier
                         .weight(1f)

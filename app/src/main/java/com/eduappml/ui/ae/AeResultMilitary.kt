@@ -124,6 +124,6 @@ fun AeResultMilitary(modifier: Modifier = Modifier, title: String?, onBack: () -
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = aeQuizMilitary, textColor = textColor)
+        QuizSection(questions = aeQuizMilitary, textColor = textColor, nodeId = "ae")
     }
 }

@@ -81,6 +81,17 @@ private fun MainThirdContent(
     var glossaryAvoid by remember { mutableStateOf<AvoidCircle?>(null) }
     val extraPadPx = with(LocalDensity.current) { 36.dp.toPx() }
 
+    // См. комментарий-близнец в MenuScreen.kt.
+    val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
+    val graphWalls = PaddingValues(
+        start = 8.dp,
+        end = 8.dp,
+        top = statusBarTop + 68.dp,
+        bottom = navBarBottom + 8.dp
+    )
+
     BackHandler { onBack() }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -93,9 +104,8 @@ private fun MainThirdContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    // top был 28.dp — чуть увеличен, чтобы чип не липнул к
-                    // самому верху экрана (небольшой визуальный отступ).
-                    .padding(top = 38.dp),
+                    .statusBarsPadding()
+                    .padding(top = 12.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
                 TitleChip(text = "Искусственные нейронные сети")
@@ -107,6 +117,7 @@ private fun MainThirdContent(
             nodes = nodes,
             edges = edges,
             modifier = Modifier.fillMaxSize(),
+            wallPadding = graphWalls,
             avoidCircles = listOfNotNull(backAvoid, glossaryAvoid),
             activeNodeIds = if (isGod) null else unlockedNodes,
             onNodeClick = { id ->
@@ -130,7 +141,9 @@ private fun MainThirdContent(
                 contentAlignment = Alignment.BottomCenter
             ) {
                 Row(
-                    modifier = Modifier.padding(bottom = 32.dp),
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(bottom = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {

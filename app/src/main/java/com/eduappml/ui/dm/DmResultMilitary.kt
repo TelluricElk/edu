@@ -20,6 +20,7 @@ import com.eduappml.ui.common.QuizQuestion
 import com.eduappml.ui.common.QuizSection
 import com.eduappml.ui.common.buildResultChatPrompt
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 private val dmQuizMilitary = listOf(
     QuizQuestion(
@@ -100,8 +101,8 @@ fun DmResultMilitary(modifier: Modifier = Modifier, title: String?, onBack: () -
                     Canvas(modifier = Modifier.fillMaxSize().padding(10.dp)) {
                         val w = size.width; val h = size.height
                         fun toPx(x: Float, y: Float) = Offset((x / 8f + 1f) / 2f * w, h - (y / 8f + 1f) / 2f * h)
-                        DmLabMilitary.realSample.forEach { p -> drawCircle(Color.White.copy(alpha = 0.12f), radius = 3f, center = toPx(p.x, p.y)) }
-                        samples.forEach { p -> drawCircle(Color(0xFF9D4EDD), radius = 3.5f, center = toPx(p.x, p.y)) }
+                        DmLabMilitary.realSample.forEach { p -> drawCircle(Color.White.copy(alpha = 0.12f), radius = designPx(3f), center = toPx(p.x, p.y)) }
+                        samples.forEach { p -> drawCircle(Color(0xFF9D4EDD), radius = designPx(3.5f), center = toPx(p.x, p.y)) }
                     }
                 }
                 Spacer(Modifier.height(10.dp))

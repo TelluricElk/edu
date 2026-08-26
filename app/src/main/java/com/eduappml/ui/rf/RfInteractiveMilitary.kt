@@ -22,6 +22,7 @@ import com.eduappml.ui.dt.DtLabMilitary
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 /**
  * Военный вариант экрана "Интерактив" для темы случайного леса: та же
@@ -210,7 +211,7 @@ private fun RfCanvasMilitary(forest: List<com.eduappml.ui.dt.DtNodeMilitary>) {
         RfLabMilitary.trainSet.forEach { p ->
             val pt = toPx(p.age, p.examScore)
             val color = if (p.admitted) Color(0xFF6BCB77) else Color(0xFFFF6B6B)
-            drawCircle(color, radius = 5f, center = pt)
+            drawCircle(color, radius = designPx(5f), center = pt)
         }
     }
 }

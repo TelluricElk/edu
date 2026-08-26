@@ -1252,6 +1252,7 @@ int attr yearTodayStyle 0x7f030494
 int bool abc_action_bar_embed_tabs 0x7f040000
 int bool abc_config_actionMenuItemAllCaps 0x7f040001
 int bool mtrl_btn_textappearance_all_caps 0x7f040002
+int bool portrait_only 0x7f040003
 int color abc_background_cache_hint_selector_material_dark 0x7f050000
 int color abc_background_cache_hint_selector_material_light 0x7f050001
 int color abc_btn_colored_borderless_text_material 0x7f050002
@@ -2941,6 +2942,7 @@ int drawable design_ic_visibility 0x7f070085
 int drawable design_ic_visibility_off 0x7f070086
 int drawable design_password_eye 0x7f070087
 int drawable design_snackbar_background 0x7f070088
+int drawable emblem_krasnodar 0x7f0700eb
 int drawable ic_arrow_back_black_24 0x7f070089
 int drawable ic_call_answer 0x7f07008a
 int drawable ic_call_answer_low 0x7f07008b

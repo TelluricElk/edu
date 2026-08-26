@@ -128,6 +128,6 @@ fun LrResultMilitary(modifier: Modifier = Modifier, title: String?, onBack: () -
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = lrQuizMilitary, textColor = textColor)
+        QuizSection(questions = lrQuizMilitary, textColor = textColor, nodeId = "lr")
     }
 }

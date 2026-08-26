@@ -21,6 +21,7 @@ import com.eduappml.ui.common.buildInteractiveChatPrompt
 import com.eduappml.ui.lr.LrLab
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 @Composable
 fun GbInteractive(
@@ -170,7 +171,7 @@ private fun GbFitCanvas(model: GbLab.BoostingModel) {
         )
 
         LrLab.trainSet.forEach { p ->
-            drawCircle(Color(0xFF00C2A8), radius = 5f, center = toPx(p.area, p.price))
+            drawCircle(Color(0xFF00C2A8), radius = designPx(5f), center = toPx(p.area, p.price))
         }
 
         var prev: Offset? = null
@@ -178,7 +179,7 @@ private fun GbFitCanvas(model: GbLab.BoostingModel) {
         while (a <= maxArea) {
             val pred = GbLab.predict(model, a)
             val pt = toPx(a, pred)
-            prev?.let { drawLine(Color.White, it, pt, strokeWidth = 3f) }
+            prev?.let { drawLine(Color.White, it, pt, strokeWidth = designPx(3f)) }
             prev = pt
             a += (maxArea - minArea) / 60f
         }
@@ -203,7 +204,7 @@ private fun GbLossCanvas(model: GbLab.BoostingModel, bestTestIdx: Int) {
             var prev: Offset? = null
             values.forEachIndexed { idx, v ->
                 val pt = toPx(idx, v, values.size)
-                prev?.let { drawLine(color, it, pt, strokeWidth = 2.5f) }
+                prev?.let { drawLine(color, it, pt, strokeWidth = designPx(2.5f)) }
                 prev = pt
             }
         }
@@ -213,7 +214,7 @@ private fun GbLossCanvas(model: GbLab.BoostingModel, bestTestIdx: Int) {
 
         if (bestTestIdx < model.testMseHistory.size) {
             val pt = toPx(bestTestIdx, model.testMseHistory[bestTestIdx], model.testMseHistory.size)
-            drawCircle(Color.White, radius = 5f, center = pt, style = Stroke(width = 2f))
+            drawCircle(Color.White, radius = designPx(5f), center = pt, style = Stroke(width = designPx(2f)))
         }
     }
 }

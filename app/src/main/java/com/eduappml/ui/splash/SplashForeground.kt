@@ -17,6 +17,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -45,7 +46,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -61,6 +64,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.min
 
 import com.eduappml.MainActivity
+import com.eduappml.R
 import com.eduappml.ThemeManager
 import com.eduappml.game.GameManager
 import com.eduappml.managers.SessionManager
@@ -158,10 +162,18 @@ fun SplashForeground(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp)
-                .alpha(contentAlpha.value),
+                .alpha(contentAlpha.value)
+                .offset(y = (-40).dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.emblem_krasnodar),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(108.dp)
+            )
+            Spacer(Modifier.height(18.dp))
             Text(
                 text = "Машинное обучение",
                 textAlign = TextAlign.Center,

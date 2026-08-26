@@ -117,6 +117,6 @@ fun SvmResultMilitary(modifier: Modifier = Modifier, title: String?, onBack: () 
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = svmQuizMilitary, textColor = textColor)
+        QuizSection(questions = svmQuizMilitary, textColor = textColor, nodeId = "svm")
     }
 }

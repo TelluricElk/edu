@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import com.eduappml.ui.common.designPx
 
 /**
  * Военный вариант экрана "Интерактив" для темы GNN: та же логика, что у
@@ -162,7 +163,7 @@ private fun GraphCanvasMilitary(probs: FloatArray) {
         GnnLabMilitary.adjacency.forEachIndexed { v, neighbors ->
             neighbors.forEach { u ->
                 if (u > v) {
-                    drawLine(Color.White.copy(alpha = 0.18f), positions[v], positions[u], strokeWidth = 1.3f)
+                    drawLine(Color.White.copy(alpha = 0.18f), positions[v], positions[u], strokeWidth = designPx(1.3f))
                 }
             }
         }
@@ -171,9 +172,9 @@ private fun GraphCanvasMilitary(probs: FloatArray) {
             val predicted = probs[v] >= 0.5f
             val actual = GnnLabMilitary.community[v] == 1
             val color = if (predicted) Color(0xFFB5179E) else Color(0xFF4D96FF)
-            drawCircle(color, radius = 9f, center = pos)
+            drawCircle(color, radius = designPx(9f), center = pos)
             if (predicted != actual) {
-                drawCircle(Color.White, radius = 12f, center = pos, style = Stroke(width = 2f))
+                drawCircle(Color.White, radius = designPx(12f), center = pos, style = Stroke(width = designPx(2f)))
             }
         }
     }

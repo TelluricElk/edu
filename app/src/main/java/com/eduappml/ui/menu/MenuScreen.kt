@@ -109,6 +109,22 @@ private fun MainMenuContent(
     var fwdAvoid by remember { mutableStateOf<AvoidCircle?>(null) }
     val extraPadPx = with(LocalDensity.current) { 36.dp.toPx() }
 
+    // Системные инсеты вместо подобранных чисел (38.dp сверху / 32.dp снизу).
+    // Приложение рисует под барами, поэтому эти числа были на самом деле
+    // «высота статус-бара и панели навигации конкретного телефона».
+    val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
+    // «Стенки» для графа. Верхней стенки в BubbleGraph раньше не было вовсе —
+    // в ландшафте и на планшете верхние узлы заезжали под заголовок и под
+    // статус-бар. 68dp — это полоса заголовка-чипа с воздухом.
+    val graphWalls = PaddingValues(
+        start = 8.dp,
+        end = 8.dp,
+        top = statusBarTop + 68.dp,
+        bottom = navBarBottom + 8.dp
+    )
+
     val visible = appeared && externalVisible
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -121,9 +137,8 @@ private fun MainMenuContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    // top был 28.dp — чуть увеличен, чтобы чип не липнул к
-                    // самому верху экрана (небольшой визуальный отступ).
-                    .padding(top = 38.dp),
+                    .statusBarsPadding()
+                    .padding(top = 12.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
                 PulsingTitleChip(text = "Классические алгоритмы")
@@ -140,6 +155,7 @@ private fun MainMenuContent(
                 nodes = nodes,
                 edges = edges,
                 modifier = Modifier.fillMaxSize(),
+                wallPadding = graphWalls,
                 avoidCircles = listOfNotNull(backAvoid, glossaryAvoid, fwdAvoid),
                 activeNodeIds = if (isGod) null else unlockedNodes,
                 onNodeClick = { nodeId ->
@@ -161,7 +177,9 @@ private fun MainMenuContent(
                 contentAlignment = Alignment.BottomCenter
             ) {
                 Row(
-                    modifier = Modifier.padding(bottom = 32.dp),
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(bottom = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {

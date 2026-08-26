@@ -22,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 /**
  * Военный вариант экрана "Интерактив" для темы полносвязной сети: та же
@@ -183,8 +184,8 @@ private fun FcBoundaryCanvasMilitary(network: FcLabMilitary.Network) {
         FcLabMilitary.trainSet.forEach { p ->
             val pt = Offset((p.signal1 / FcLabMilitary.FEATURE_MAX) * w, h - (p.signal2 / FcLabMilitary.FEATURE_MAX) * h)
             val color = if (p.label >= 0.5f) Color(0xFF6BCB77) else Color(0xFFFF6B6B)
-            drawCircle(color, radius = 5f, center = pt)
-            drawCircle(Color.White.copy(alpha = 0.5f), radius = 5f, center = pt, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1f))
+            drawCircle(color, radius = designPx(5f), center = pt)
+            drawCircle(Color.White.copy(alpha = 0.5f), radius = designPx(5f), center = pt, style = androidx.compose.ui.graphics.drawscope.Stroke(width = designPx(1f)))
         }
     }
 }
@@ -228,18 +229,18 @@ private fun FcArchitectureCanvasMilitary(network: FcLabMilitary.Network) {
             hiddenPositions.forEachIndexed { hi, hp ->
                 val weight = network.w1[hi][ii]
                 val alphaVal = (abs(weight) / maxW1).coerceIn(0.08f, 1f)
-                drawLine(Color.White.copy(alpha = alphaVal * 0.8f), ip, hp, strokeWidth = 1f + alphaVal * 3f)
+                drawLine(Color.White.copy(alpha = alphaVal * 0.8f), ip, hp, strokeWidth = designPx(1f + alphaVal * 3f))
             }
         }
         // Связи скрытый слой -> выход
         hiddenPositions.forEachIndexed { hi, hp ->
             val weight = network.w2[hi]
             val alphaVal = (abs(weight) / maxW2).coerceIn(0.08f, 1f)
-            drawLine(Color.White.copy(alpha = alphaVal * 0.8f), hp, outputPosition, strokeWidth = 1f + alphaVal * 3f)
+            drawLine(Color.White.copy(alpha = alphaVal * 0.8f), hp, outputPosition, strokeWidth = designPx(1f + alphaVal * 3f))
         }
 
-        inputPositions.forEach { drawCircle(Color(0xFFFF6B6B), radius = 8f, center = it) }
-        hiddenPositions.forEach { drawCircle(Color.White, radius = 8f, center = it) }
-        drawCircle(Color(0xFF6BCB77), radius = 9f, center = outputPosition)
+        inputPositions.forEach { drawCircle(Color(0xFFFF6B6B), radius = designPx(8f), center = it) }
+        hiddenPositions.forEach { drawCircle(Color.White, radius = designPx(8f), center = it) }
+        drawCircle(Color(0xFF6BCB77), radius = designPx(9f), center = outputPosition)
     }
 }

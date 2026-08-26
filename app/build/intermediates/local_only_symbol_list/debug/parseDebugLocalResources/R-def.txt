@@ -1,5 +1,6 @@
 R_DEF: Internal format may change without notice
 local
+bool portrait_only
 color accent_dark
 color background_dark
 color button_background_dark
@@ -8,6 +9,7 @@ color surface_dark
 color text_primary_dark
 color text_secondary_dark
 drawable bg_gradient_dark
+drawable emblem_krasnodar
 drawable ic_launcher_background
 drawable ic_launcher_foreground
 drawable splash_background

@@ -24,6 +24,7 @@ import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 /**
  * Военный вариант экрана "Интерактив" для темы дерева решений: та же
@@ -250,8 +251,8 @@ private fun DtCanvasMilitary(tree: DtNodeMilitary) {
         DtLabMilitary.trainSet.forEach { p ->
             val pt = toPx(p.age, p.examScore)
             val color = if (p.admitted) Color(0xFF6BCB77) else Color(0xFFFF6B6B)
-            drawCircle(color, radius = 5f, center = pt)
-            drawCircle(Color.White.copy(alpha = 0.5f), radius = 5f, center = pt, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1f))
+            drawCircle(color, radius = designPx(5f), center = pt)
+            drawCircle(Color.White.copy(alpha = 0.5f), radius = designPx(5f), center = pt, style = androidx.compose.ui.graphics.drawscope.Stroke(width = designPx(1f)))
         }
     }
 }

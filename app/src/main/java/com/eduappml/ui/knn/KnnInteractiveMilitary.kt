@@ -27,6 +27,7 @@ import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 /**
  * Военный вариант экрана "Интерактив" для темы k-NN: та же логика, что у
@@ -281,8 +282,8 @@ private fun KnnCanvasMilitary(
         KnnLabMilitary.trainSet.forEach { point ->
             val p = toPx(point.speed, point.altitude)
             val color = KnnLabMilitary.classColors[point.label] ?: Color.White
-            drawCircle(color = color, radius = 6f, center = p)
-            drawCircle(color = Color.White.copy(alpha = 0.6f), radius = 6f, center = p, style = Stroke(width = 1.2f))
+            drawCircle(color = color, radius = designPx(6f), center = p)
+            drawCircle(color = Color.White.copy(alpha = 0.6f), radius = designPx(6f), center = p, style = Stroke(width = designPx(1.2f)))
         }
 
         // Точка запроса + линии к соседям
@@ -295,11 +296,11 @@ private fun KnnCanvasMilitary(
                     color = Color.White.copy(alpha = 0.35f),
                     start = qp,
                     end = np,
-                    strokeWidth = 1.5f
+                    strokeWidth = designPx(1.5f)
                 )
             }
-            drawCircle(color = Color.White, radius = 9f, center = qp, style = Stroke(width = 3f))
-            drawCircle(color = Color.Black.copy(alpha = 0.4f), radius = 9f, center = qp)
+            drawCircle(color = Color.White, radius = designPx(9f), center = qp, style = Stroke(width = designPx(3f)))
+            drawCircle(color = Color.Black.copy(alpha = 0.4f), radius = designPx(9f), center = qp)
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.eduappml
 
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -33,6 +34,30 @@ class MainActivity : ComponentActivity() {
         // отключить фичу отсюда было равносильно закрывать дверь после
         // того, как через неё уже прошли. Единственное надёжное место —
         // сама тема, до создания окна.
+
+        // Ориентация: телефон — только портрет, планшет — свободно.
+        //
+        // Вся раскладка приложения портретная по построению: позиции пузырей
+        // заданы долями высоты, а экраны урока рассчитывают на вертикальную
+        // прокрутку. В ландшафте на телефоне под контент остаётся ~200dp, и
+        // карта знаний сплющивается в полоску. На планшете ландшафт наоборот
+        // естественен, поэтому там ограничение снимается — признак берётся из
+        // ресурса R.bool.portrait_only (values/ и values-sw600dp/).
+        //
+        // Почему не android:screenOrientation в манифесте: этот атрибут не
+        // принимает ссылку на ресурс, только литерал, — а нам нужно разное
+        // поведение для телефона и планшета.
+        //
+        // На заметку на будущее: начиная с targetSdk 36 Android игнорирует
+        // ограничение ориентации на экранах от 600dp. Здесь targetSdk 35, так
+        // что ограничение работает; при подъёме до 36 эта строка просто станет
+        // бездействовать на больших экранах — что для нас и так желаемое
+        // поведение.
+        requestedOrientation = if (resources.getBoolean(R.bool.portrait_only)) {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        }
 
         // Рисуем контент под системными барами
         WindowCompat.setDecorFitsSystemWindows(window, false)

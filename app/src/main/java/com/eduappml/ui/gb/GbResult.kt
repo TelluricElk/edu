@@ -111,6 +111,6 @@ fun GbResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, 
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = gbQuiz, textColor = textColor)
+        QuizSection(questions = gbQuiz, textColor = textColor, nodeId = "gb")
     }
 }

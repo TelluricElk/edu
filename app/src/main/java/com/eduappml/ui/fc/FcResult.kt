@@ -111,6 +111,6 @@ fun FcResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, 
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = fcQuiz, textColor = textColor)
+        QuizSection(questions = fcQuiz, textColor = textColor, nodeId = "fc")
     }
 }

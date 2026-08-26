@@ -118,6 +118,6 @@ fun AeResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, 
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = aeQuiz, textColor = textColor)
+        QuizSection(questions = aeQuiz, textColor = textColor, nodeId = "ae")
     }
 }

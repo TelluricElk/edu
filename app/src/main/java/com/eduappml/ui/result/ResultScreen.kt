@@ -217,6 +217,6 @@ private fun KnnResult(modifier: Modifier = Modifier, title: String?, onBack: () 
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = knnQuiz, textColor = textColor)
+        QuizSection(questions = knnQuiz, textColor = textColor, nodeId = "knn")
     }
 }

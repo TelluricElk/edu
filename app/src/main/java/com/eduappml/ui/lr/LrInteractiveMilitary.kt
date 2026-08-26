@@ -20,6 +20,7 @@ import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 /**
  * Военный вариант экрана "Интерактив" для темы линейной регрессии: та же
@@ -203,8 +204,8 @@ private fun LrCanvasMilitary(w1: Float, w0: Float, diverged: Boolean, refW1: Flo
 
         LrLabMilitary.trainSet.forEach { p ->
             val pt = toPx(p.distance, p.fuel)
-            drawCircle(color = Color(0xFFFF6B6B), radius = 5f, center = pt)
-            drawCircle(color = Color.White.copy(alpha = 0.5f), radius = 5f, center = pt, style = Stroke(width = 1f))
+            drawCircle(color = Color(0xFFFF6B6B), radius = designPx(5f), center = pt)
+            drawCircle(color = Color.White.copy(alpha = 0.5f), radius = designPx(5f), center = pt, style = Stroke(width = designPx(1f)))
         }
 
         // Эталонная (аналитическая) линия — полупрозрачный пунктир для сравнения
@@ -212,14 +213,14 @@ private fun LrCanvasMilitary(w1: Float, w0: Float, diverged: Boolean, refW1: Flo
         val refEnd = toPx(maxDistance, refW1 * maxDistance + refW0)
         drawLine(
             color = Color.White.copy(alpha = 0.35f),
-            start = refStart, end = refEnd, strokeWidth = 2f,
+            start = refStart, end = refEnd, strokeWidth = designPx(2f),
             pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(10f, 8f))
         )
 
         if (!diverged) {
             val start = toPx(minDistance, w1 * minDistance + w0)
             val end = toPx(maxDistance, w1 * maxDistance + w0)
-            drawLine(color = Color.White, start = start, end = end, strokeWidth = 3f)
+            drawLine(color = Color.White, start = start, end = end, strokeWidth = designPx(3f))
         }
     }
 }

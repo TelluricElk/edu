@@ -21,6 +21,7 @@ import com.eduappml.ui.common.buildInteractiveChatPrompt
 import com.eduappml.ui.lr.LrLabMilitary
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 /**
  * Военный вариант экрана "Интерактив" для темы градиентного бустинга: та
@@ -176,7 +177,7 @@ private fun GbFitCanvasMilitary(model: GbLabMilitary.BoostingModel) {
         )
 
         LrLabMilitary.trainSet.forEach { p ->
-            drawCircle(Color(0xFF00C2A8), radius = 5f, center = toPx(p.distance, p.fuel))
+            drawCircle(Color(0xFF00C2A8), radius = designPx(5f), center = toPx(p.distance, p.fuel))
         }
 
         var prev: Offset? = null
@@ -184,7 +185,7 @@ private fun GbFitCanvasMilitary(model: GbLabMilitary.BoostingModel) {
         while (d <= maxDistance) {
             val pred = GbLabMilitary.predict(model, d)
             val pt = toPx(d, pred)
-            prev?.let { drawLine(Color.White, it, pt, strokeWidth = 3f) }
+            prev?.let { drawLine(Color.White, it, pt, strokeWidth = designPx(3f)) }
             prev = pt
             d += (maxDistance - minDistance) / 60f
         }
@@ -209,7 +210,7 @@ private fun GbLossCanvasMilitary(model: GbLabMilitary.BoostingModel, bestTestIdx
             var prev: Offset? = null
             values.forEachIndexed { idx, v ->
                 val pt = toPx(idx, v, values.size)
-                prev?.let { drawLine(color, it, pt, strokeWidth = 2.5f) }
+                prev?.let { drawLine(color, it, pt, strokeWidth = designPx(2.5f)) }
                 prev = pt
             }
         }
@@ -219,7 +220,7 @@ private fun GbLossCanvasMilitary(model: GbLabMilitary.BoostingModel, bestTestIdx
 
         if (bestTestIdx < model.testMseHistory.size) {
             val pt = toPx(bestTestIdx, model.testMseHistory[bestTestIdx], model.testMseHistory.size)
-            drawCircle(Color.White, radius = 5f, center = pt, style = Stroke(width = 2f))
+            drawCircle(Color.White, radius = designPx(5f), center = pt, style = Stroke(width = designPx(2f)))
         }
     }
 }

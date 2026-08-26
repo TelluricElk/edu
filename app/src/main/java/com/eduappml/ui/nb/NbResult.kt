@@ -110,6 +110,6 @@ fun NbResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, 
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = nbQuiz, textColor = textColor)
+        QuizSection(questions = nbQuiz, textColor = textColor, nodeId = "nb")
     }
 }

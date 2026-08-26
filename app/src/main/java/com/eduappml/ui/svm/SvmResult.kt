@@ -112,6 +112,6 @@ fun SvmResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit,
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = svmQuiz, textColor = textColor)
+        QuizSection(questions = svmQuiz, textColor = textColor, nodeId = "svm")
     }
 }

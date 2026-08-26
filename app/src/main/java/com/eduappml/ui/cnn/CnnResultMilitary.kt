@@ -120,6 +120,6 @@ fun CnnResultMilitary(modifier: Modifier = Modifier, title: String?, onBack: () 
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = cnnQuizMilitary, textColor = textColor)
+        QuizSection(questions = cnnQuizMilitary, textColor = textColor, nodeId = "cnn")
     }
 }

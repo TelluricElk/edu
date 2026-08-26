@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.Adaptive
 import com.eduappml.ui.common.BottomPillButton
 import com.eduappml.ui.common.GlossaryRow
 
@@ -44,9 +45,20 @@ fun NeuralGlossaryScreen(
 ) {
     BackHandler { onBack() }
 
-    Box(modifier = modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 16.dp)) {
+    // См. комментарий-близнец в GlossaryScreen.kt: системные инсеты вместо
+    // подобранного числа и ограничение ширины списка для планшета.
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 8.dp, vertical = 12.dp)
+    ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .widthIn(max = Adaptive.ContentMaxWidth)
+                .fillMaxSize()
+                .align(Alignment.TopCenter),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -87,7 +99,7 @@ fun NeuralGlossaryScreen(
         }
 
         Box(
-            modifier = Modifier.fillMaxSize().padding(bottom = 16.dp),
+            modifier = Modifier.fillMaxSize().padding(bottom = 4.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
             BottomPillButton(

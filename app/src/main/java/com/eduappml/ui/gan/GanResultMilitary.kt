@@ -20,6 +20,7 @@ import com.eduappml.ui.common.QuizQuestion
 import com.eduappml.ui.common.QuizSection
 import com.eduappml.ui.common.buildResultChatPrompt
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 private val ganQuizMilitary = listOf(
     QuizQuestion(
@@ -100,8 +101,8 @@ fun GanResultMilitary(modifier: Modifier = Modifier, title: String?, onBack: () 
                     Canvas(modifier = Modifier.fillMaxSize().padding(8.dp)) {
                         val w = size.width; val h = size.height
                         fun toPx(x: Float, y: Float) = Offset((x / GanLabMilitary.FEATURE_MAX) * w, h - (y / GanLabMilitary.FEATURE_MAX) * h)
-                        GanLabMilitary.realSample.forEach { p -> drawCircle(Color(0xFF6BCB77).copy(alpha = 0.55f), radius = 4f, center = toPx(p.x, p.y)) }
-                        generated.forEach { p -> drawCircle(Color(0xFF00C2A8), radius = 4f, center = toPx(p.x, p.y)) }
+                        GanLabMilitary.realSample.forEach { p -> drawCircle(Color(0xFF6BCB77).copy(alpha = 0.55f), radius = designPx(4f), center = toPx(p.x, p.y)) }
+                        generated.forEach { p -> drawCircle(Color(0xFF00C2A8), radius = designPx(4f), center = toPx(p.x, p.y)) }
                     }
                 }
                 Spacer(Modifier.height(10.dp))

@@ -24,6 +24,7 @@ import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 @Composable
 fun DtInteractive(
@@ -249,8 +250,8 @@ private fun DtCanvas(tree: DtNode) {
         DtLab.trainSet.forEach { p ->
             val pt = toPx(p.age, p.income)
             val color = if (p.approved) Color(0xFF6BCB77) else Color(0xFFFF6B6B)
-            drawCircle(color, radius = 5f, center = pt)
-            drawCircle(Color.White.copy(alpha = 0.5f), radius = 5f, center = pt, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1f))
+            drawCircle(color, radius = designPx(5f), center = pt)
+            drawCircle(Color.White.copy(alpha = 0.5f), radius = designPx(5f), center = pt, style = androidx.compose.ui.graphics.drawscope.Stroke(width = designPx(1f)))
         }
     }
 }

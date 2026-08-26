@@ -111,6 +111,6 @@ fun RfResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, 
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = rfQuiz, textColor = textColor)
+        QuizSection(questions = rfQuiz, textColor = textColor, nodeId = "rf")
     }
 }

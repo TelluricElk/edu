@@ -19,6 +19,7 @@ import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.buildInteractiveChatPrompt
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 @Composable
 fun LogrInteractive(
@@ -175,7 +176,7 @@ private fun LogrCanvas(w: Float, b: Float, threshold: Float) {
             topLeft = Offset(0f, thresholdY),
             size = androidx.compose.ui.geometry.Size(width, height - thresholdY)
         )
-        drawLine(Color.White.copy(alpha = 0.35f), Offset(0f, thresholdY), Offset(width, thresholdY), strokeWidth = 1.5f)
+        drawLine(Color.White.copy(alpha = 0.35f), Offset(0f, thresholdY), Offset(width, thresholdY), strokeWidth = designPx(1.5f))
 
         // сигмоида
         var prev: Offset? = null
@@ -183,7 +184,7 @@ private fun LogrCanvas(w: Float, b: Float, threshold: Float) {
         while (h <= LogrLab.HOURS_MAX) {
             val prob = LogrLab.predictProba(h, w, b)
             val pt = toPx(h, prob)
-            prev?.let { drawLine(Color.White, it, pt, strokeWidth = 3f) }
+            prev?.let { drawLine(Color.White, it, pt, strokeWidth = designPx(3f)) }
             prev = pt
             h += 0.2f
         }
@@ -192,7 +193,7 @@ private fun LogrCanvas(w: Float, b: Float, threshold: Float) {
         LogrLab.trainSet.forEach { p ->
             val pt = toPx(p.hours, p.passed)
             val color = if (p.passed >= 1f) Color(0xFF6BCB77) else Color(0xFFFF6B6B)
-            drawCircle(color, radius = 5f, center = pt)
+            drawCircle(color, radius = designPx(5f), center = pt)
         }
     }
 }

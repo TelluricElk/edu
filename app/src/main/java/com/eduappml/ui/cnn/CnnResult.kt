@@ -114,6 +114,6 @@ fun CnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit,
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = cnnQuiz, textColor = textColor)
+        QuizSection(questions = cnnQuiz, textColor = textColor, nodeId = "cnn")
     }
 }

@@ -116,6 +116,6 @@ fun NbResultMilitary(modifier: Modifier = Modifier, title: String?, onBack: () -
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = nbQuizMilitary, textColor = textColor)
+        QuizSection(questions = nbQuizMilitary, textColor = textColor, nodeId = "nb")
     }
 }

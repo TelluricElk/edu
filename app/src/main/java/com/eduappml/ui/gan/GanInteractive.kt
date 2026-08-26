@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
+import com.eduappml.ui.common.designPx
 
 @Composable
 fun GanInteractive(
@@ -147,10 +148,10 @@ private fun GanCanvas(generated: List<Point2D>) {
         fun toPx(x: Float, y: Float) = Offset((x / GanLab.FEATURE_MAX) * w, h - (y / GanLab.FEATURE_MAX) * h)
 
         GanLab.realSample.forEach { p ->
-            drawCircle(Color(0xFF6BCB77).copy(alpha = 0.55f), radius = 4.5f, center = toPx(p.x, p.y))
+            drawCircle(Color(0xFF6BCB77).copy(alpha = 0.55f), radius = designPx(4.5f), center = toPx(p.x, p.y))
         }
         generated.forEach { p ->
-            drawCircle(Color(0xFF00C2A8), radius = 4.5f, center = toPx(p.x, p.y))
+            drawCircle(Color(0xFF00C2A8), radius = designPx(4.5f), center = toPx(p.x, p.y))
         }
     }
 }

@@ -109,6 +109,6 @@ fun KmResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, 
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = kmQuiz, textColor = textColor)
+        QuizSection(questions = kmQuiz, textColor = textColor, nodeId = "km")
     }
 }

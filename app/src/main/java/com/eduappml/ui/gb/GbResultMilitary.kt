@@ -117,6 +117,6 @@ fun GbResultMilitary(modifier: Modifier = Modifier, title: String?, onBack: () -
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = gbQuizMilitary, textColor = textColor)
+        QuizSection(questions = gbQuizMilitary, textColor = textColor, nodeId = "gb")
     }
 }

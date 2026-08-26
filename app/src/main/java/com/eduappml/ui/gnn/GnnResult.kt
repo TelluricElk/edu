@@ -119,6 +119,6 @@ fun GnnResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit,
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = gnnQuiz, textColor = textColor)
+        QuizSection(questions = gnnQuiz, textColor = textColor, nodeId = "gnn")
     }
 }

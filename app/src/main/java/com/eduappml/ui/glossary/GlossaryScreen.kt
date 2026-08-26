@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eduappml.ui.common.Adaptive
 import com.eduappml.ui.common.BottomPillButton
 import com.eduappml.ui.common.GlossaryRow
 
@@ -43,9 +44,24 @@ fun GlossaryScreen(
 ) {
     BackHandler { onBack() }
 
-    Box(modifier = modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 16.dp)) {
+    // Отступы под системные бары — вместо прежнего «на глаз» vertical = 16.dp.
+    // Приложение рисует под барами, поэтому без этого заголовок на телефоне с
+    // высоким статус-баром подлезал под часы, а кнопка внизу — под панель
+    // навигации. Ширина списка ограничена: на планшете строка глоссария
+    // растягивалась на весь экран, и аббревиатура слева оказывалась в другом
+    // конце экрана от значка справа — глазу нечем их связать.
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 8.dp, vertical = 12.dp)
+    ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .widthIn(max = Adaptive.ContentMaxWidth)
+                .fillMaxSize()
+                .align(Alignment.TopCenter),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -86,7 +102,7 @@ fun GlossaryScreen(
         }
 
         Box(
-            modifier = Modifier.fillMaxSize().padding(bottom = 16.dp),
+            modifier = Modifier.fillMaxSize().padding(bottom = 4.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
             BottomPillButton(

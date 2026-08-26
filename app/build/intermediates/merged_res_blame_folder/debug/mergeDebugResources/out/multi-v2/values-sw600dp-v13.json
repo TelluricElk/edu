@@ -4,6 +4,59 @@
             "outputFile": "com.eduappml.app-mergeDebugResources-62:/values-sw600dp-v13/values-sw600dp-v13.xml",
             "map": [
                 {
+                    "source": "C:\\Users\\sasaa\\yurovskiy\\kozlov\\EduAppML v.19\\app\\src\\main\\res\\values-sw600dp\\bools.xml",
+                    "from": {
+                        "startLines": "13",
+                        "startColumns": "4",
+                        "startOffsets": "561",
+                        "endColumns": "43",
+                        "endOffsets": "600"
+                    },
+                    "to": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "43",
+                        "endOffsets": "94"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\sasaa\\.gradle\\caches\\8.13\\transforms\\ee73834a3294df1efe48f71854d29a9c\\transformed\\appcompat-1.6.1\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
+                    "from": {
+                        "startLines": "-1,-1,-1,-1,-1,-1,-1,-1",
+                        "startColumns": "-1,-1,-1,-1,-1,-1,-1,-1",
+                        "startOffsets": "-1,-1,-1,-1,-1,-1,-1,-1"
+                    },
+                    "to": {
+                        "startLines": "3,4,5,6,7,8,9,10",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "99,168,237,307,381,457,516,587",
+                        "endColumns": "68,68,69,73,75,58,70,67",
+                        "endOffsets": "163,232,302,376,452,511,582,650"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\sasaa\\.gradle\\caches\\8.13\\transforms\\a34bd5b96fc900f304ef0a35e3a37fcc\\transformed\\material-1.12.0\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
+                    "from": {
+                        "startLines": "-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1",
+                        "startColumns": "-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1",
+                        "startOffsets": "-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1"
+                    },
+                    "to": {
+                        "startLines": "11,12,13,14,15,16,17,19,20,21,22,23",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "655,715,785,856,928,986,1044,1153,1217,1273,1332,1395",
+                        "endLines": "11,12,13,14,15,16,18,19,20,21,22,26",
+                        "endColumns": "59,69,70,71,57,57,10,63,55,58,62,10",
+                        "endOffsets": "710,780,851,923,981,1039,1148,1212,1268,1327,1390,1562"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "C:\\Users\\sasaa\\.gradle\\daemon\\8.13\\com.eduappml.app-mergeDebugResources-62:\\values-sw600dp-v13\\values-sw600dp-v13.xml",
+            "map": [
+                {
                     "source": "C:\\Users\\sasaa\\.gradle\\caches\\8.13\\transforms\\ee73834a3294df1efe48f71854d29a9c\\transformed\\appcompat-1.6.1\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
