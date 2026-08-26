@@ -65,6 +65,7 @@ import kotlin.math.min
 
 import com.eduappml.MainActivity
 import com.eduappml.R
+import com.eduappml.ui.common.currentUiScale
 import com.eduappml.ThemeManager
 import com.eduappml.game.GameManager
 import com.eduappml.managers.SessionManager
@@ -114,9 +115,12 @@ fun SplashForeground(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                // top был 36.dp — чуть увеличен, чтобы шапка не липла к самому
-                // верху экрана (только визуальный отступ, чуть-чуть).
-                .padding(top = 46.dp, start = 16.dp, end = 16.dp),
+                // Было `top = 46.dp` — подобранное на глаз число, в котором
+                // «спрятана» высота статус-бара конкретного телефона. Теперь
+                // высоту бара спрашиваем у системы, а 8.dp — уже честный
+                // визуальный отступ, одинаковый на всех устройствах.
+                .statusBarsPadding()
+                .padding(top = 8.dp, start = 16.dp, end = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {
@@ -158,12 +162,20 @@ fun SplashForeground(
             }
         }
 
+        // Эмблема и заголовки масштабируются вместе с экраном: на планшете
+        // эмблема 108dp посреди 10 дюймов теряется, а 36sp читается как
+        // подпись, а не как титул. На телефоне коэффициент равен 1.0 —
+        // там ничего не меняется. Подъём колонки (-40dp) тоже пропорционален,
+        // иначе на большом экране он перестаёт быть заметен, а на маленьком
+        // становится слишком грубым.
+        val titleScale = currentUiScale()
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp)
                 .alpha(contentAlpha.value)
-                .offset(y = (-40).dp),
+                .offset(y = (-40).dp * titleScale),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -171,14 +183,14 @@ fun SplashForeground(
                 painter = painterResource(id = R.drawable.emblem_krasnodar),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
-                modifier = Modifier.size(108.dp)
+                modifier = Modifier.size(108.dp * titleScale)
             )
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(18.dp * titleScale))
             Text(
                 text = "Машинное обучение",
                 textAlign = TextAlign.Center,
-                fontSize = 36.sp,
-                lineHeight = 38.sp,
+                fontSize = 36.sp * titleScale,
+                lineHeight = 38.sp * titleScale,
                 letterSpacing = 1.5.sp,
                 color = Color.White,
                 style = TextStyle()
@@ -187,8 +199,8 @@ fun SplashForeground(
             Text(
                 text = "Образовательное приложение",
                 textAlign = TextAlign.Center,
-                fontSize = 16.sp,
-                lineHeight = 18.sp,
+                fontSize = 16.sp * titleScale,
+                lineHeight = 18.sp * titleScale,
                 color = Color.White.copy(alpha = 0.92f),
                 style = TextStyle()
             )
@@ -197,7 +209,8 @@ fun SplashForeground(
         ShimmerBubbleButton(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 56.dp)
+                .navigationBarsPadding()
+                .padding(bottom = 24.dp)
                 .alpha(contentAlpha.value),
             bubbleSizeDp = 64.dp,
             onClick = { runExit() }
