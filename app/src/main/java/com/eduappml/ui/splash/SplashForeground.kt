@@ -121,19 +121,9 @@ fun SplashForeground(
                 // визуальный отступ, одинаковый на всех устройствах.
                 .statusBarsPadding()
                 .padding(top = 8.dp, start = 16.dp, end = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.Top
         ) {
-            Column(horizontalAlignment = Alignment.Start) {
-                Text(
-                    text = "rnk@romannk.ru",
-                    textAlign = TextAlign.Start,
-                    fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.95f),
-                    style = TextStyle()
-                )
-            }
-
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -278,11 +268,18 @@ private fun SettingsPanel(
                     .background(Color(0xFF1B1526))
                     .padding(vertical = 6.dp)
             ) {
-                SettingsRow(
-                    icon = if (isDark) Icons.Filled.LightMode else Icons.Filled.DarkMode,
-                    label = if (isDark) "Светлая тема" else "Тёмная тема",
-                    onClick = { onToggleTheme(); onDismiss() }
-                )
+                // ВРЕМЕННО СКРЫТО (17.09.2026, по просьбе Самира): переключение
+                // на светлую тему убрано из панели настроек — светлая тема ещё не
+                // вычитана по контрасту. Вернуть = раскомментировать блок ниже;
+                // сам механизм (ThemeManager, activity.toggleTheme(), параметры
+                // isDark/onToggleTheme) намеренно оставлен на месте. См.
+                // _agent/30-BACKLOG.md.
+                //
+                // SettingsRow(
+                //     icon = if (isDark) Icons.Filled.LightMode else Icons.Filled.DarkMode,
+                //     label = if (isDark) "Светлая тема" else "Тёмная тема",
+                //     onClick = { onToggleTheme(); onDismiss() }
+                // )
                 SettingsRow(
                     icon = if (isGod) Icons.Filled.Person else Icons.Filled.AdminPanelSettings,
                     label = if (isGod) "Обычный режим" else "Режим разработчика",

@@ -1,0 +1,16 @@
+{
+  "name": "eduappml-llm-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HTTP-шлюз между приложением EduAppML и OpenAI-совместимым API llm.armintel.ru",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1"
+  }
+}

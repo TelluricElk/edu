@@ -11,6 +11,26 @@
     <!-- Разрешение на доступ к интернету (нужно для загрузки KaTeX с CDN) -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!--
+        Голосовой режим Edu.AI (Yandex AI Studio Realtime): микрофон пишется
+        напрямую через AudioRecord и уходит по WebSocket в наш релей, см.
+        пакет com.eduappml.voice. Разрешение запрашивается в рантайме при
+        первом нажатии на кнопку микрофона в ChatScreen.kt — до этого момента
+        приложение микрофон не трогает.
+
+        MODIFY_AUDIO_SETTINGS нужен эхоподавителю (AcousticEchoCanceler):
+        без него ассистент слышит собственный голос из динамика и перебивает
+        сам себя. Разрешение обычное, диалога пользователю не показывает.
+    -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- Голосовой режим без микрофона не работает, но и остальное приложение
+         из-за его отсутствия блокировать незачем. -->
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+
     <permission
         android:name="com.eduappml.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         android:protectionLevel="signature" />
@@ -63,6 +83,34 @@
             android:name="ru.noties.jlatexmath.JLatexMathInitProvider"
             android:authorities="com.eduappml.jlatexmathinitprovider"
             android:exported="false" />
+
+        <!--
+            FileProvider для кнопки "Снять на камеру" в чате Edu.AI.
+            ActivityResultContracts.TakePicture требует content://-ссылку на файл,
+            в который системная камера положит снимок; выдать её может только
+            провайдер. Раскрывается ровно один каталог - camera/ во внутреннем
+            кэше приложения, см. res/xml/file_paths.xml и createCameraUri()
+            в ui/chat/ChatScreen.kt.
+
+            Authority записан целиком, а не через ${applicationId}: в этом
+            манифесте все authorities уже прописаны явно (androidx-startup,
+            jlatexmathinitprovider) - держим единый стиль. Значение должно
+            совпадать с fileProviderAuthority() в ChatScreen.kt, то есть
+            с packageName + ".fileprovider".
+
+            Разрешение CAMERA не нужно: снимок делает системное приложение
+            камеры. Разрешения на запись тоже не нужны: сохранение картинки
+            в галерею идёт через MediaStore (см. ChatImageViewer.kt).
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.eduappml.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true" >
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <receiver
             android:name="androidx.profileinstaller.ProfileInstallReceiver"

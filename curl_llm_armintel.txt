@@ -1,0 +1,77 @@
+Пример curl-запроса к llm.armintel.ru
+========================================
+
+База: OpenAI-совместимый API (чат-эндпоинт /api/v1/chat/completions).
+
+
+1) Проверить доступность и список моделей
+
+2) Чат-запрос (подробный пример)
+--------------------------------
+curl -s https://llm.armintel.ru/api/v1/chat/completions \
+  -H "Authorization: Bearer токен" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "DeepSeek-V4-Flash-Vision-Exp",
+    "messages": [
+      {"role": "system", "content": "Ты — ассистент по инфраструктуре."},
+      {"role": "user",   "content": "Коротко объясни, что такое LSB-стеганография."}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 512,
+    "stream": false
+  }'
+
+Параметры:
+  model        — id модели из /v1/models (см. список ниже)
+  messages     — история: system / user / assistant
+  temperature  — креативность (0..2), ниже = детерминированнее
+  max_tokens   — лимит длины ответа
+  stream       — true → ответ по SSE потоком (построчно)
+
+3) Вызов с токеном, вписанным прямо в команду (без файла)
+---------------------------------------------------------
+curl -s https://llm.armintel.ru/api/v1/chat/completions \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY3NzJhODFhLTU4NGUtNGJjZi04ZmIzLTQ1NDFlYmUwZTdiNSIsImp0aSI6IjY0NWY3NjJkLWFhM2ItNGQ4Yy05MThhLWE4ZDAxN2MyYWZkMCIsImlhdCI6MTc4MDQ4MzgwM30.yWRJaSbPuvRC7Ev4yApC-P_y07c1HYNtDpODyDzsYFI" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"phi4-mini:3.8b-fp16","messages":[{"role":"user","content":"Привет!"}],"max_tokens":50}'
+
+Токен проверен 16.09.2026
+
+----------------------------------------------------------------------
+Доступные модели (id из /v1/models, на 16.09.2026)
+----------------------------------------------------------------------
+Локально:
+
+  gpt-oss:20b                                    GPT-OS 20.9B, MXFP4
+  bge-m3:latest                                   Эмбеддинги (RAG), F16
+  functiongemma:270m-it-fp16                      Tool-calling, 270M
+  granite4:small-h                                IBM Granite 4 small
+  ministral-3:14b-instruct-2512-fp16              Mistral Small 3.1 14B
+  nomic-embed-text:latest                         Эмбеддинги
+  opencoder:8b-instruct-fp16                       Код
+  phi4-mini:3.8b-fp16                              Phi-4 mini
+  qwen2.5vl:72b                                   
+  qwen3-embedding:8b-fp16                          Эмбеддинги
+  lfm2:24b-bf16                                    LLAMA factory / lfm, 24B
+  qwen3.5:122b-a10b                                Qwen3.5 122B
+
+HuggingFace (GGUF):
+  hf.co/DevQuasar/Vikhrmodels.Vikhr-YandexGPT-5-Lite-8B-it-GGUF:F16
+  hf.co/lmstudio-community/Mistral-Small-3.1-24B-Instruct-2503-GGUF:Q8_0
+  hf.co/mradermacher/QVikhr-3-1.7B-Instruction-noreasoning-GGUF:F16
+  hf.co/t-tech/T-pro-it-1.0-Q8_0-GGUF:latest
+  hf.co/yandex/YandexGPT-5-Lite-8B-instruct-GGUF:latest
+  cyankiwi/GLM-5.2-AWQ-INT4                          GLM-5.2 AWQ 4bit
+  Kimi-K2.7-Code-UD-Q4_K_XL-00001-of-00014.gguf      Kimi K2.7 Code
+  Qwen3.8-Flash-Next                                  Qwen3.8 Flash Next (TP=2)
+  qwen-3.6-35b-a3b                                    Qwen3.6 35B-A3B MoE
+  qwen3-coder-next:q8_0                               Qwen3 Coder Next
+
+Прочие (не-Ollama софт / спец. развёртки):
+  DeepSeek-V4-Flash-Vision-Exp                        DeepSeek V4 Flash (vision-эксперимент)
+  FastContext-1.0-4B-SFT                              Быстрый контекст, 4B
+  gemma-3-27b-it                                      Gemma 3 27B instruct
+  glm-5.3-Flash                                       GLM 5.3 Flash (docker @8000)
+
+

@@ -1,0 +1,17 @@
+{
+  "name": "eduappml-voice-relay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebSocket-релей между приложением EduAppML и Yandex AI Studio Realtime API",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ws": "^8.18.0"
+  }
+}

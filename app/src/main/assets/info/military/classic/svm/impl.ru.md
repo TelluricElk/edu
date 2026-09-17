@@ -1,102 +1,339 @@
-## Программная реализация SVM
+## Программная реализация
 
-### Реализация на Python
+### Реализация с нуля на Python
 
-Ниже — алгоритм **Pegasos** (Primal Estimated sub-GrAdient SOlver) — простой и настоящий стохастический метод обучения линейного SVM, без сторонних библиотек:
+Полный рабочий код: генерация корпуса сессий, ядровой Pegasos с мягким
+зазором, линейное и RBF-ядро, подсчёт опорных векторов и ширины зазора.
+
+```python
+import math
+
+# легитимный трафик: небольшие пакеты, рукопожатия завершаются
+LEGIT = (0.35, 0.13, 0.18, 0.11)
+# аномальный: крупные пакеты и/или много SYN без ответа
+ANOM = (0.66, 0.14, 0.62, 0.15)
+
+
+class Lcg:
+    """LCG с параметрами java.util.Random — тот же генератор стоит в Kotlin,
+    поэтому корпус сессий побитово совпадает с приложением."""
+
+    def __init__(self, seed):
+        self.s = seed & 0xFFFFFFFFFFFF
+
+    def nf(self):
+        self.s = (self.s * 0x5DEECE66D + 0xB) & 0xFFFFFFFFFFFF
+        return (self.s >> 24) / float(1 << 24)
+
+    def gauss(self, mu, sd):
+        return mu + sd * (sum(self.nf() for _ in range(6)) - 3.0) / math.sqrt(0.5)
+
+
+def clamp01(v):
+    return 0.0 if v < 0 else (1.0 if v > 1 else v)
+
+
+def generate(seed, n, outlier_rate):
+    """outlier_rate — доля легитимных сессий, выглядящих как аномалия.
+    Это ночной бэкап: крупные пакеты, большой объём, профиль почти как у
+    эксфильтрации. Такие точки лежат в чужом углу и тянут границу на себя."""
+    rnd = Lcg(seed)
+    data = []
+    for _ in range(n):
+        is_anom = 1 if rnd.nf() < 0.5 else -1
+        m1, s1, m2, s2 = ANOM if is_anom == 1 else LEGIT
+        x1 = clamp01(rnd.gauss(m1, s1))
+        x2 = clamp01(rnd.gauss(m2, s2))
+        if is_anom == -1 and rnd.nf() < outlier_rate:
+            x1 = clamp01(rnd.gauss(0.80, 0.08))
+            x2 = clamp01(rnd.gauss(0.70, 0.10))
+        data.append(((x1, x2), is_anom))
+    return data
+
+
+def kernel(a, b, kind, gamma):
+    """Слагаемое +1 — это дополнение постоянным признаком, дающее модели
+    свободный член. Без него разделяющая гиперплоскость обязана проходить
+    через начало координат, а оба класса лежат в положительном квадранте —
+    разделить их было бы нельзя. Сумма двух ядер снова является ядром."""
+    if kind == "linear":
+        return a[0] * b[0] + a[1] * b[1] + 1.0
+    dx, dy = a[0] - b[0], a[1] - b[1]
+    return math.exp(-gamma * (dx * dx + dy * dy)) + 1.0
+
+
+def train(data, C, kind, gamma, iterations):
+    """Ядровой Pegasos. lam = 1/(C*n): большое C означает слабую
+    регуляризацию, то есть дорогие нарушения зазора."""
+    n = len(data)
+    lam = 1.0 / max(C * n, 1e-9)
+    alpha = [0.0] * n
+    rnd = Lcg(12345)
+    for t in range(1, iterations + 1):
+        i = min(int(rnd.nf() * n), n - 1)
+        xi, yi = data[i]
+        s = 0.0
+        for j in range(n):
+            if alpha[j] != 0.0:
+                s += alpha[j] * data[j][1] * kernel(data[j][0], xi, kind, gamma)
+        if yi * s / (lam * t) < 1.0:      # наблюдение нарушает зазор
+            alpha[i] += 1.0
+    return alpha, lam, iterations
+
+
+def decide(x, data, alpha, lam, T, kind, gamma):
+    s = 0.0
+    for j in range(len(data)):
+        if alpha[j] != 0.0:
+            s += alpha[j] * data[j][1] * kernel(data[j][0], x, kind, gamma)
+    return s / (lam * T)
+
+
+def weights(data, alpha, lam, T):
+    """Для линейного ядра — явные веса и свободный член; последний берётся
+    из той самой константной компоненты ядра."""
+    w0 = w1 = b = 0.0
+    for j in range(len(data)):
+        if alpha[j] != 0.0:
+            w0 += alpha[j] * data[j][1] * data[j][0][0]
+            w1 += alpha[j] * data[j][1] * data[j][0][1]
+            b += alpha[j] * data[j][1]
+    return w0 / (lam * T), w1 / (lam * T), b / (lam * T)
+
+
+def margin_width(w0, w1):
+    nrm = math.sqrt(w0 * w0 + w1 * w1)
+    return 2.0 / nrm if nrm > 1e-9 else 0.0
+
+
+def support_vectors(data, alpha, lam, T, kind, gamma):
+    """Опорные векторы ПО ОПРЕДЕЛЕНИЮ мягкого зазора: наблюдения на краю
+    зазора или внутри него. Считать их как alpha > 0 для Pegasos нельзя —
+    так попадут все точки, хоть раз нарушившие зазор за время обучения."""
+    return sum(
+        1 for x, y in data
+        if y * decide(x, data, alpha, lam, T, kind, gamma) <= 1.0 + 1e-9
+    )
+
+
+def accuracy(test, data, alpha, lam, T, kind, gamma):
+    ok = sum(
+        1 for x, y in test
+        if (1 if decide(x, data, alpha, lam, T, kind, gamma) >= 0 else -1) == y
+    )
+    return ok / len(test)
+
+
+N, ITER = 120, 3000
+
+print("--- параметр C на чистых данных (линейное ядро) ---")
+print("     C    точность  опорных  ширина зазора")
+tr = generate(42, N, 0.0)
+te = generate(777, 80, 0.0)
+for C in [0.05, 0.2, 1.0, 5.0, 25.0]:
+    a, lam, T = train(tr, C, "linear", 0.0, ITER)
+    w0, w1, b = weights(tr, a, lam, T)
+    print(f"  {C:6.2f}   {accuracy(te, tr, a, lam, T, 'linear', 0.0):.4f}"
+          f"    {support_vectors(tr, a, lam, T, 'linear', 0.0):3d}"
+          f"     {margin_width(w0, w1):.4f}")
+
+print()
+print("--- то же при 25% выбросов (ночной бэкап) ---")
+print("     C    точность  опорных  ширина зазора")
+tro = generate(42, N, 0.25)
+teo = generate(777, 80, 0.25)
+for C in [0.05, 0.2, 1.0, 5.0, 25.0]:
+    a, lam, T = train(tro, C, "linear", 0.0, ITER)
+    w0, w1, b = weights(tro, a, lam, T)
+    print(f"  {C:6.2f}   {accuracy(teo, tro, a, lam, T, 'linear', 0.0):.4f}"
+          f"    {support_vectors(tro, a, lam, T, 'linear', 0.0):3d}"
+          f"     {margin_width(w0, w1):.4f}")
+
+print()
+print("--- RBF-ядро при 25% выбросов, C = 1 ---")
+for g in [0.5, 2.0, 8.0, 30.0]:
+    a, lam, T = train(tro, 1.0, "rbf", g, ITER)
+    print(f"  gamma={g:5.1f}  точность={accuracy(teo, tro, a, lam, T, 'rbf', g):.4f}"
+          f"  опорных={support_vectors(tro, a, lam, T, 'rbf', g):3d}")
+
+print()
+print("--- эталон: C=1, линейное ядро, 3000 итераций, выбросов 10% ---")
+d = generate(42, N, 0.10)
+t2 = generate(777, 80, 0.10)
+a, lam, T = train(d, 1.0, "linear", 0.0, ITER)
+w0, w1, b = weights(d, a, lam, T)
+print(f"  точность = {accuracy(t2, d, a, lam, T, 'linear', 0.0):.4f}")
+print(f"  опорных векторов = {support_vectors(d, a, lam, T, 'linear', 0.0)} из {N}")
+print(f"  w = ({w0:.4f}, {w1:.4f}), b = {b:.4f}")
+print(f"  ширина зазора = {margin_width(w0, w1):.4f}")
+```
+
+Вывод:
+
+```
+--- параметр C на чистых данных (линейное ядро) ---
+     C    точность  опорных  ширина зазора
+    0.05   0.4625    100     1.7625
+    0.20   0.9875     86     0.7228
+    1.00   0.9875     50     0.4301
+    5.00   0.9875     19     0.2631
+   25.00   0.9500     23     0.1456
+
+--- то же при 25% выбросов (ночной бэкап) ---
+     C    точность  опорных  ширина зазора
+    0.05   0.4375    110     2.2584
+    0.20   0.7750     99     0.9439
+    1.00   0.8125     74     0.5306
+    5.00   0.7750     60     0.3861
+   25.00   0.7625     40     0.2283
+
+--- RBF-ядро при 25% выбросов, C = 1 ---
+  gamma=  0.5  точность=0.8000  опорных= 72
+  gamma=  2.0  точность=0.7875  опорных= 46
+  gamma=  8.0  точность=0.8250  опорных= 36
+  gamma= 30.0  точность=0.8125  опорных= 38
+
+--- эталон: C=1, линейное ядро, 3000 итераций, выбросов 10% ---
+  точность = 0.9375
+  опорных векторов = 63 из 120
+  w = (1.6663, 3.7405), b = -1.9600
+  ширина зазора = 0.4884
+```
+
+Три наблюдения, ради которых стоит смотреть на эти таблицы.
+
+**Ширина зазора и число опорных векторов монотонны по C.** На чистых данных
+зазор сужается с 1,76 до 0,146, а опорных векторов остаётся 23 вместо ста.
+Модель всё сильнее держится на горстке пограничных сессий.
+
+**На чистых данных точность почти не страдает, на грязных — страдает.** Без
+выбросов диапазон от C=0,2 до C=5 даёт одинаковые 0,9875: классы разделимы, и
+ширина зазора на результат почти не влияет. Стоит добавить ночной бэкап — и
+появляется настоящий максимум при C=1, а дальше точность падает. Это и есть
+переобучение под выбросы, измеренное числом.
+
+**Слишком малое C бесполезно.** При C=0,05 точность около 0,45, то есть хуже
+подбрасывания монеты. Регуляризация настолько велика, что модель почти не
+смотрит на данные — зазор раздут, все точки внутри него, граница случайна.
+
+### Готовое решение
 
 ```python
 import numpy as np
+from sklearn.svm import SVC, LinearSVC, OneClassSVM
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.calibration import CalibratedClassifierCV
 
+X = np.array([x for x, _ in d])
+y = np.array([lab for _, lab in d])
 
-class PegasosSVM:
-    """Линейный SVM, обучаемый стохастическим субградиентным спуском
-    (алгоритм Pegasos, Shalev-Shwartz et al., 2007)."""
+model = make_pipeline(StandardScaler(), SVC(kernel="rbf", C=1.0, gamma="scale"))
+model.fit(X, y)
 
-    def __init__(self, C=1.0, epochs=200, seed=0):
-        self.C = C
-        self.epochs = epochs
-        self.rng = np.random.default_rng(seed)
-        self.w = None
-        self.b = 0.0
+svc = model.named_steps["svc"]
+print("опорных векторов по классам:", svc.n_support_)
 
-    def fit(self, X, y):
-        X = np.array(X, dtype=float)
-        y = np.array(y, dtype=float)      # метки должны быть -1 / +1
-        n, d = X.shape
-        self.w = np.zeros(d)
-        lam = 1.0 / (self.C * n)          # связь регуляризации с параметром C
-
-        for t in range(1, self.epochs * n + 1):
-            i = self.rng.integers(0, n)
-            eta = 1.0 / (lam * t)
-            margin = y[i] * (X[i] @ self.w + self.b)
-
-            if margin < 1:
-                self.w = (1 - eta * lam) * self.w + eta * y[i] * X[i]
-                self.b += eta * y[i]
-            else:
-                self.w = (1 - eta * lam) * self.w
-        return self
-
-    def decision_function(self, X):
-        return np.array(X, dtype=float) @ self.w + self.b
-
-    def predict(self, X):
-        return np.sign(self.decision_function(X))
+grid = GridSearchCV(
+    model,
+    {
+        "svc__C": [0.1, 1, 10, 100],
+        "svc__gamma": ["scale", 0.5, 2.0, 8.0],
+    },
+    cv=5,
+)
+grid.fit(X, y)
+print("лучшие параметры:", grid.best_params_)
 ```
 
-Пример использования — тот же датасет диагностики двигателя (температура, вибрация), что и в интерактиве:
+Четыре замечания по этому листингу.
+
+`StandardScaler` обязателен и здесь: SVM работает с расстояниями, и признак с
+большим разбросом подомнёт остальные — ровно как в методе ближайших соседей.
+В нашей задаче оба признака уже лежат в диапазоне от нуля до единицы, поэтому
+эффект не виден, но привычку стоит держать.
+
+Значение `gamma="scale"` — разумный автоматический выбор, обратно
+пропорциональный дисперсии признаков. С него имеет смысл начинать подбор.
+
+`SVC` плохо масштабируется: сложность обучения растёт примерно от квадрата до
+куба числа объектов. На десятках тысяч сессий берут `LinearSVC` или
+`SGDClassifier(loss="hinge")` — последний и есть примерно то, что реализовано
+в нашем листинге.
+
+Вероятностей `SVC` не даёт. Параметр `probability=True` включает калибровку
+Платта с перекрёстной проверкой внутри, что заметно замедляет обучение;
+явная `CalibratedClassifierCV` поверх обученной модели обычно удобнее.
+
+Для детекции аномалий, когда размеченных атак нет, используется одноклассовый
+вариант — он обучается только на нормальном трафике:
 
 ```python
-X_train = [[7.1, 6.9], [6.5, 7.4], ...]   # исправно (+1) и предаварийное (-1)
-y_train = [1, 1, -1, -1, ...]
-
-model = PegasosSVM(C=1.0, epochs=200)
-model.fit(X_train, y_train)
-model.predict([[6.0, 6.0]])
+oc = make_pipeline(StandardScaler(), OneClassSVM(nu=0.05, kernel="rbf", gamma="scale"))
+oc.fit(X[y == -1])          # только легитимные сессии
+anomaly = oc.predict(X) == -1
 ```
 
-### Готовое решение: scikit-learn
-
-```python
-from sklearn.svm import SVC
-
-model = SVC(kernel="rbf", C=1.0, gamma="scale")   # или kernel="linear"
-model.fit(X_train, y_train)
-model.predict(X_test)
-model.support_vectors_    # координаты опорных векторов
-```
+Параметр `nu` здесь — верхняя граница доли обучающих объектов, которые модель
+согласна счесть выбросами, и одновременно нижняя граница доли опорных векторов.
 
 ### А что реально считает интерактив в этом приложении
 
-В интерактиве реализован тот же алгоритм Pegasos на Kotlin — с реальными шагами субградиентного спуска, а не заглушкой:
+В приложении тот же алгоритм на Kotlin, в `SvmLab.kt`. Шаг обучения:
 
 ```kotlin
-fun trainPegasos(data: List<LabeledPoint>, c: Float, epochs: Int): Pair<FloatArray, Float> {
+fun train(c: Double, kernel: SvmKernel, gamma: Double, iterations: Int,
+          data: List<FlowSample>): SvmModel {
     val n = data.size
-    val lambda = 1f / (c * n)
-    var w = floatArrayOf(0f, 0f)
-    var b = 0f
-    var t = 1
+    val lambda = 1.0 / maxOf(c * n, 1e-9)
+    val alpha = DoubleArray(n)
+    val rnd = Lcg(12345L)
 
-    repeat(epochs) {
-        data.shuffled().forEach { point ->
-            val eta = 1f / (lambda * t)
-            val margin = point.label * (dot(w, point.features) + b)
-            if (margin < 1f) {
-                w = subtractScaled(w, eta * lambda, w)
-                w = addScaled(w, eta * point.label, point.features)
-                b += eta * point.label
-            } else {
-                w = subtractScaled(w, eta * lambda, w)
+    for (t in 1..iterations) {
+        val i = minOf((rnd.nextDouble() * n).toInt(), n - 1)
+        var s = 0.0
+        for (j in 0 until n) {
+            if (alpha[j] != 0.0) {
+                s += alpha[j] * data[j].label * kernelValue(data[j], data[i], kernel, gamma)
             }
-            t++
         }
+        if (data[i].label * s / (lambda * t) < 1.0) alpha[i] += 1.0
     }
-    return w to b
+    return SvmModel(alpha, lambda, iterations, kernel, gamma, data)
 }
 ```
 
+Для линейного ядра экран рисует границу и две пунктирные линии зазора по
+явным весам; для RBF граница строится перебором по сетке, потому что явных
+весов там нет. Опорные векторы подсвечиваются кольцом и определяются
+условием на значение решающей функции, а не по коэффициентам.
+
 ### Важная оговорка
 
-Pegasos обучает **линейный** SVM. Для ядровых (нелинейных) версий в интерактиве используется упрощённая ядровая модификация того же принципа — полноценный SMO-солвер (как в `libsvm`, на который опирается `scikit-learn`) значительно сложнее и выходит за рамки учебной реализации.
+**Два признака вместо десятков.** Настоящий детектор аномального трафика
+смотрит на длительность сессии, число уникальных портов и адресов, энтропию
+размеров пакетов, направление потока, время суток. Два признака взяты, чтобы
+зазор и опорные векторы можно было увидеть глазами. Для SVM это ещё и
+нетипично мало: его сила проявляется как раз в высоких размерностях.
+
+**Pegasos вместо точного решения.** Настоящие реализации решают двойственную
+задачу квадратичного программирования и находят точный оптимум. Pegasos даёт
+приближение, зато за время, линейное по числу итераций, и позволяет показать
+процесс. Именно поэтому в интерактиве есть слайдер числа итераций — у точного
+решателя его бы не было.
+
+**Корпус синтетический.** Сессии сгенерированы из заданных распределений.
+Реальный трафик устроен сложнее: распределения тяжелохвостые, а «нормальное»
+поведение меняется по времени суток и дню недели.
+
+**Выбросы смоделированы одним кластером.** Наш ночной бэкап — компактная
+группа в чужом углу. В жизни легитимная активность, похожая на атаку,
+разнообразнее: обновления, синхронизация, сканеры уязвимостей собственной
+службы ИБ. Но урок от этого не меняется: под такие вещи границу подстраивать
+не надо.
+
+**Масштабирование признаков опущено.** Оба признака уже в диапазоне от нуля до
+единицы, поэтому в `SvmLab.kt` нормализации нет. В реальной задаче это был бы
+обязательный шаг — см. тему метода ближайших соседей, где цена его пропуска
+разобрана подробно.

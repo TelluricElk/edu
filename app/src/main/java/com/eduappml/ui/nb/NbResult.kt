@@ -16,79 +16,217 @@ import com.eduappml.ui.common.QuizSection
 
 private val nbQuiz = listOf(
     QuizQuestion(
-        "В чём заключается «наивность» наивного Байеса?",
+        "В чём состоит «наивность» наивного Байеса?",
         listOf(
-            QuizOption("В предположении, что признаки условно независимы при заданном классе", true),
-            QuizOption("В том, что алгоритм не использует обучающую выборку", false),
-            QuizOption("В том, что он не умеет считать вероятности", false),
-            QuizOption("В отсутствии математического обоснования", false)
+            QuizOption(
+                "В допущении, что признаки внутри класса независимы, — это позволяет перемножать их правдоподобия",
+                true
+            ),
+            QuizOption("В том, что модель обучается всего за один проход по данным", false),
+            QuizOption("В том, что априорные вероятности берутся равными", false),
+            QuizOption("В том, что признаки считаются нормально распределёнными", false)
         ),
-        "Реальные признаки почти всегда коррелируют, но допущение независимости сильно упрощает расчёты и часто работает достаточно хорошо."
+        "Независимость позволяет заменить одну многомерную плотность на произведение одномерных. " +
+            "Именно это делает метод устойчивым на малых выборках и в высоких размерностях — " +
+            "и оно же почти всегда неверно. Нормальность признаков — отдельное допущение, " +
+            "оно относится к гауссовскому варианту, а не к «наивности»."
     ),
     QuizQuestion(
-        "Зачем в гауссовском наивном Байесе используют логарифмы вероятностей?",
+        "Вы подняли связь признаков внутри класса, и F1 упал с 0,84 до 0,73. Что при этом произошло со средней уверенностью модели?",
         listOf(
-            QuizOption("Чтобы избежать численного исчезновения при перемножении многих малых чисел", true),
-            QuizOption("Логарифмы делают вычисления медленнее, но точнее", false),
-            QuizOption("Это чисто эстетическое решение, на результат не влияет", false),
-            QuizOption("Логарифмы нужны только для дискретных признаков", false)
+            QuizOption("Практически не изменилась — модель стала чаще ошибаться, не став менее уверенной", true),
+            QuizOption("Упала пропорционально F1", false),
+            QuizOption("Упала до 0,5, то есть модель начала сомневаться", false),
+            QuizOption("Выросла до 1,0", false)
         ),
-        "Произведение множества вероятностей быстро становится числом, близким к нулю; сумма логарифмов решает эту проблему без потери информации о том, какой класс вероятнее."
+        "Скоррелированные признаки модель считает независимыми уликами и складывает их логарифмы " +
+            "в полную силу, преувеличивая силу свидетельства. Оценки прижимаются к нулю и единице " +
+            "независимо от того, права модель или нет. Отсюда главный практический вывод: наивный " +
+            "Байес хорошо отвечает «какой класс» и плохо — «с какой вероятностью»."
     ),
     QuizQuestion(
-        "Что оценивается по обучающей выборке для гауссовского наивного Байеса?",
+        "Зачем нужно сглаживание дисперсии и что происходит, если переусердствовать?",
         listOf(
-            QuizOption("Среднее, дисперсия и априорная вероятность для каждого класса", true),
-            QuizOption("Расстояния между всеми парами точек", false),
-            QuizOption("Только количество объектов в выборке", false),
-            QuizOption("Веса линейной модели", false)
+            QuizOption(
+                "Оно спасает от нулевой дисперсии, но в избытке делает все распределения одинаково широкими и модель перестаёт различать классы",
+                true
+            ),
+            QuizOption("Оно ускоряет обучение, а в избытке замедляет его", false),
+            QuizOption("Оно нужно только для мультиномиального варианта", false),
+            QuizOption("Оно исправляет нарушение независимости признаков", false)
         ),
-        "Именно эти параметры полностью описывают предполагаемое нормальное распределение признаков внутри каждого класса."
+        "Нулевая дисперсия даёт бесконечную плотность и минус бесконечность в логарифме для всех " +
+            "остальных значений — модель начинает отвергать любой объект, отличающийся от виденного. " +
+            "Это прямой аналог сглаживания Лапласа. Но большая добавка выравнивает дисперсии, " +
+            "квадратичные члены в границе решения сокращаются, и кривая граница выпрямляется в прямую."
     ),
     QuizQuestion(
-        "Когда наивный Байес особенно хорошо подходит для задачи?",
+        "Почему априорная вероятность в интерактиве задаётся отдельным слайдером, а не берётся из обучающей выборки?",
         listOf(
-            QuizOption("Когда признаков много, а данных немного — например, в классификации текста", true),
-            QuizOption("Только когда признаки идеально независимы", false),
-            QuizOption("Только для задач регрессии", false),
-            QuizOption("Никогда, это устаревший алгоритм", false)
+            QuizOption(
+                "Доля DGA в обучающем корпусе выровнена искусственно, а базовая частота в реальном потоке несоизмеримо ниже",
+                true
+            ),
+            QuizOption("Потому что из выборки её посчитать невозможно", false),
+            QuizOption("Чтобы модель обучалась быстрее", false),
+            QuizOption("Потому что априорная вероятность не влияет на результат", false)
         ),
-        "Наивный Байес быстро обучается и устойчив при большом числе признаков и ограниченном объёме данных — классический пример: фильтрация спама."
+        "Обучающий набор балансируют, чтобы модели хватило примеров редкого класса. Если взять " +
+            "априорную вероятность оттуда, модель унаследует неверную базовую частоту. В SOC её " +
+            "оценивают наблюдением потока. В sklearn за это отвечает параметр `priors` у GaussianNB — " +
+            "без него берётся доля из выборки."
     )
 )
 
+/**
+ * Экран «Решение задачи» для наивного Байеса.
+ *
+ * Показывает два прогона одной и той же модели — на независимых признаках и
+ * на сильно связанных — потому что сравнение этих двух колонок и есть главный
+ * вывод темы. Все числа считаются на лету через [NbLab].
+ */
 @Composable
-fun NbResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
+fun NbResult(
+    modifier: Modifier = Modifier,
+    title: String?,
+    onBack: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
+) {
     val textColor = Color.White
-    val accent = Color(0xFF4D96FF)
+    val accent = Color(0xFFFFD93D)
+    val topicTitle = title ?: "Наивный Байес"
 
-    val stats = remember { NbLab.fitStats(NbLab.trainSet) }
-    val accuracy = remember { NbLab.accuracy(stats, NbLab.testSet) }
+    val prior = NbLab.DEFAULT_PRIOR
+    val thr = NbLab.DEFAULT_THRESHOLD
+
+    // независимые признаки — допущение метода выполняется
+    val trainIndep = remember { NbLab.trainSet(0.0, NbLab.DEFAULT_TRAIN_SIZE) }
+    val testIndep = remember { NbLab.testSet(0.0) }
+    val modelIndep = remember(trainIndep) { NbLab.fit(trainIndep, NbLab.DEFAULT_VAR_SMOOTHING) }
+    val cmIndep = remember(modelIndep) { NbLab.evaluate(testIndep, modelIndep, prior, thr) }
+    val confIndep = remember(modelIndep) { NbLab.meanConfidence(testIndep, modelIndep, prior) }
+
+    // сильно связанные признаки — допущение нарушено
+    val trainDep = remember { NbLab.trainSet(0.9, NbLab.DEFAULT_TRAIN_SIZE) }
+    val testDep = remember { NbLab.testSet(0.9) }
+    val modelDep = remember(trainDep) { NbLab.fit(trainDep, NbLab.DEFAULT_VAR_SMOOTHING) }
+    val cmDep = remember(modelDep) { NbLab.evaluate(testDep, modelDep, prior, thr) }
+    val confDep = remember(modelDep) { NbLab.meanConfidence(testDep, modelDep, prior) }
 
     LessonScaffold(
         eyebrow = "Решение задачи",
-        title = title ?: "Наивный Байес",
+        title = topicTitle,
         onBack = onBack,
         accent = accent,
         modifier = modifier
     ) {
-        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f))) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f))
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Эталонное решение", color = textColor, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                 Spacer(Modifier.height(8.dp))
-                Text("Гауссовский наивный Байес, параметры оценены по обучающей выборке.", color = textColor.copy(alpha = 0.85f), fontSize = 14.sp)
-                Spacer(Modifier.height(4.dp))
                 Text(
-                    "Точность на контрольной выборке: ${(accuracy * 100).toInt()}%",
-                    color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
+                    "Независимые признаки, обучающая выборка ${NbLab.DEFAULT_TRAIN_SIZE} доменов, " +
+                        "априорная вероятность ${"%.2f".format(prior)}, порог ${"%.1f".format(thr)}, " +
+                        "без сглаживания. Оценка на ${NbLab.TEST_SIZE} контрольных доменах.",
+                    color = textColor.copy(alpha = 0.85f), fontSize = 13.sp, lineHeight = 18.sp
                 )
                 Spacer(Modifier.height(10.dp))
+                Text(
+                    "TP = ${cmIndep.tp}   FP = ${cmIndep.fp}   TN = ${cmIndep.tn}   FN = ${cmIndep.fn}",
+                    color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Precision = ${"%.4f".format(cmIndep.precision)}, " +
+                        "Recall = ${"%.4f".format(cmIndep.recall)}, " +
+                        "F1 = ${"%.4f".format(cmIndep.f1)}, " +
+                        "Accuracy = ${"%.4f".format(cmIndep.accuracy)}",
+                    color = textColor.copy(alpha = 0.9f), fontSize = 13.sp, lineHeight = 18.sp
+                )
+
+                Spacer(Modifier.height(12.dp))
+                HorizontalDivider(color = textColor.copy(alpha = 0.15f))
+                Spacer(Modifier.height(12.dp))
+
+                Text("Модель целиком — восемь чисел", color = textColor,
+                    fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                Spacer(Modifier.height(6.dp))
+                modelIndep.legit?.let { s ->
+                    Text(
+                        "Легитимные: энтропия ${"%.3f".format(s.means[0])} " +
+                            "(дисперсия ${"%.4f".format(s.variances[0])}), " +
+                            "доля цифр ${"%.3f".format(s.means[1])} " +
+                            "(дисперсия ${"%.4f".format(s.variances[1])})",
+                        color = textColor.copy(alpha = 0.8f), fontSize = 12.sp, lineHeight = 17.sp
+                    )
+                }
+                modelIndep.dga?.let { s ->
+                    Text(
+                        "DGA: энтропия ${"%.3f".format(s.means[0])} " +
+                            "(дисперсия ${"%.4f".format(s.variances[0])}), " +
+                            "доля цифр ${"%.3f".format(s.means[1])} " +
+                            "(дисперсия ${"%.4f".format(s.variances[1])})",
+                        color = textColor.copy(alpha = 0.8f), fontSize = 12.sp, lineHeight = 17.sp
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f))
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    "Главный вывод темы",
+                    color = textColor, fontWeight = FontWeight.SemiBold, fontSize = 16.sp
+                )
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "Признаки независимы (допущение выполняется):",
+                    color = textColor.copy(alpha = 0.7f), fontSize = 12.sp
+                )
+                Text(
+                    "F1 = ${"%.3f".format(cmIndep.f1)},  уверенность модели = ${"%.3f".format(confIndep)}",
+                    color = Color(0xFF6BCB77), fontSize = 15.sp, fontWeight = FontWeight.SemiBold
+                )
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "Признаки сильно связаны (допущение нарушено):",
+                    color = textColor.copy(alpha = 0.7f), fontSize = 12.sp
+                )
+                Text(
+                    "F1 = ${"%.3f".format(cmDep.f1)},  уверенность модели = ${"%.3f".format(confDep)}",
+                    color = Color(0xFFFF6B6B), fontSize = 15.sp, fontWeight = FontWeight.SemiBold
+                )
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "F1 упал на ${"%.3f".format(cmIndep.f1 - cmDep.f1)}, а уверенность модели " +
+                        "изменилась на ${"%.3f".format(confDep - confIndep)} — то есть практически " +
+                        "никак. Модель стала ошибаться заметно чаще и не подала об этом ни одного " +
+                        "сигнала. Если ваша политика безопасности сформулирована в вероятностях, " +
+                        "сырой наивный Байес использовать нельзя — нужна калибровка.",
+                    color = textColor.copy(alpha = 0.8f), fontSize = 13.sp, lineHeight = 19.sp
+                )
+                Spacer(Modifier.height(12.dp))
                 AskChatButton(accent = accent, onClick = {
                     onOpenChat(
-                        "Объясни, пожалуйста, простыми словами, почему получился именно такой результат в теме «${title ?: "Наивный Байес"}» (Решение задачи).\n\n" +
-                        "Гауссовский наивный Байес, параметры оценены по обучающей выборке.\n" +
-                        "Точность на контрольной выборке: ${(accuracy * 100).toInt()}%\n\n" +
-                        "Что означает это число и почему получилось именно такое значение?"
+                        "Объясни, пожалуйста, простыми словами, почему получился именно такой " +
+                            "результат в теме «$topicTitle» (Решение задачи).\n\n" +
+                            "Задача: детект DGA-доменов по двум признакам — энтропии имени и доле цифр. " +
+                            "${NbLab.DEFAULT_TRAIN_SIZE} доменов на обучение, ${NbLab.TEST_SIZE} на контроль, " +
+                            "около трети — DGA.\n" +
+                            "При независимых признаках: TP=${cmIndep.tp}, FP=${cmIndep.fp}, " +
+                            "TN=${cmIndep.tn}, FN=${cmIndep.fn}, F1=${"%.3f".format(cmIndep.f1)}, " +
+                            "средняя уверенность модели ${"%.3f".format(confIndep)}.\n" +
+                            "При сильно связанных признаках: F1=${"%.3f".format(cmDep.f1)}, " +
+                            "средняя уверенность ${"%.3f".format(confDep)}.\n\n" +
+                            "Почему точность упала, а уверенность осталась прежней, и что с этим делают на практике?"
                     )
                 })
             }
@@ -96,16 +234,29 @@ fun NbResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, 
 
         Spacer(Modifier.height(16.dp))
 
-        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f))) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f))
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Полученные знания", color = textColor, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                 Spacer(Modifier.height(8.dp))
                 listOf(
-                    "Наивный Байес выбирает класс с максимальной апостериорной вероятностью.",
-                    "Предположение о независимости признаков почти никогда не верно, но часто не мешает.",
-                    "Для непрерывных признаков обычно используют нормальное распределение внутри каждого класса.",
-                    "Сглаживание решает проблему нулевой вероятности для редких сочетаний признаков."
-                ).forEach { Text("•  $it", color = textColor.copy(alpha = 0.85f), fontSize = 14.sp, modifier = Modifier.padding(vertical = 2.dp)) }
+                    "Наивный Байес перемножает правдоподобия признаков, сознательно считая их " +
+                        "независимыми, — и обучается одним проходом по данным.",
+                    "При нарушении независимости точность падает, а уверенность модели остаётся " +
+                        "прежней: метод не сигнализирует, что ему стало хуже.",
+                    "Числа на выходе выглядят как вероятности, но плохо откалиброваны — для политик, " +
+                        "сформулированных в вероятностях, требуется отдельная калибровка.",
+                    "Априорная вероятность берётся из наблюдения потока, а не из искусственно " +
+                        "сбалансированной обучающей выборки."
+                ).forEach {
+                    Text(
+                        "•  $it",
+                        color = textColor.copy(alpha = 0.85f), fontSize = 13.sp,
+                        lineHeight = 18.sp, modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
             }
         }
 

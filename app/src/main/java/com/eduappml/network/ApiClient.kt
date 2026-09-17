@@ -16,10 +16,21 @@ object ApiClient {
     // Клиент с интерцепторами
     private val client: OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
+        // Отправка вложения — это загрузка нескольких мегабайт base64 плюс
+        // время, которое GigaChat тратит на разбор PDF или генерацию картинки.
+        // В 30 секунд это не укладывается: запрос обрывался по таймауту уже
+        // после того, как сервер принял файл, и пользователь видел "нет сети"
+        // при рабочем интернете.
+        .readTimeout(120, TimeUnit.SECONDS)
+        .writeTimeout(120, TimeUnit.SECONDS)
+        .callTimeout(180, TimeUnit.SECONDS)
         .addInterceptor(HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY // подробные логи
+            // BODY здесь больше нельзя: тело запроса с вложением — это
+            // мегабайты base64, и logcat на них захлёбывается (строки режутся,
+            // приложение заметно тормозит на каждой отправке файла).
+            // HEADERS оставляет всё, что реально нужно для отладки: метод,
+            // адрес, код ответа, размеры.
+            level = HttpLoggingInterceptor.Level.HEADERS
         })
         .addInterceptor { chain ->
             val original = chain.request()

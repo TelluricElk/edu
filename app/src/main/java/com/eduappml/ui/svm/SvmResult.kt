@@ -13,84 +13,210 @@ import com.eduappml.ui.common.LessonScaffold
 import com.eduappml.ui.common.QuizOption
 import com.eduappml.ui.common.QuizQuestion
 import com.eduappml.ui.common.QuizSection
-import kotlin.math.roundToInt
 
-private val svmQuiz = listOf(
+private val svmQuizIb = listOf(
     QuizQuestion(
-        "Что такое опорные векторы?",
+        "Из всех прямых, одинаково хорошо разделяющих два класса, метод опорных векторов выбирает одну. По какому принципу?",
         listOf(
-            QuizOption("Точки, ближайшие к разделяющей границе, которые и определяют её положение", true),
-            QuizOption("Все точки обучающей выборки без исключения", false),
-            QuizOption("Точки, которые SVM классифицировал неверно", false),
-            QuizOption("Центры классов", false)
+            QuizOption(
+                "Ту, вокруг которой полоса, свободная от наблюдений, максимально широка",
+                true
+            ),
+            QuizOption("Ту, что проходит через центры масс двух классов", false),
+            QuizOption("Ту, что максимизирует правдоподобие разметки", false),
+            QuizOption("Ту, что даёт наибольшую точность на обучающей выборке", false)
         ),
-        "Только точки с ненулевым alpha (лежащие на границе зазора или внутри него) входят в итоговую формулу предсказания."
+        "Широкий зазор — это запас прочности к тому, чего в обучающей выборке не было. " +
+            "За этим стоит результат теории Вапника-Червоненкиса: чем шире зазор, тем уже класс " +
+            "функций, способных так разделить данные, и тем лучше гарантия обобщения. " +
+            "Максимизация правдоподобия — принцип логистической регрессии, а не SVM."
     ),
     QuizQuestion(
-        "Как параметр C влияет на модель?",
+        "На чистых данных точность почти не меняется в широком диапазоне C, а на данных с выбросами у неё появляется максимум в середине. Почему?",
         listOf(
-            QuizOption("Большое C делает границу жёсткой и чувствительной к каждой точке, малое — мягкой и более обобщающей", true),
-            QuizOption("C влияет только на скорость обучения, не на саму границу", false),
-            QuizOption("Чем больше C, тем меньше опорных векторов при любых данных", false),
-            QuizOption("C определяет число классов", false)
+            QuizOption(
+                "При большом C нарушения зазора дороги, и модель перестраивает границу под выбросы вместо того, чтобы их игнорировать",
+                true
+            ),
+            QuizOption("При большом C обучение не успевает сойтись", false),
+            QuizOption("Выбросы увеличивают число классов", false),
+            QuizOption("Это случайность, при другом seed максимума не будет", false)
         ),
-        "C — это компромисс между шириной зазора и числом допустимых нарушений: большое C сильнее наказывает за ошибки, сужая зазор."
+        "C — вес слагаемого, штрафующего нарушения, относительно слагаемого, отвечающего за " +
+            "ширину зазора. Когда классы разделимы, обе цели достижимы одновременно и C почти " +
+            "не важен. Когда есть легитимные сессии в чужом углу, большое C заставляет модель " +
+            "обслуживать именно их — в ущерб всему остальному."
     ),
     QuizQuestion(
-        "Зачем нужен kernel trick?",
+        "Что означает разреженность решения SVM и чем она отличается от устройства метода ближайших соседей?",
         listOf(
-            QuizOption("Чтобы строить нелинейные границы, не вычисляя явно отображение в пространство высокой размерности", true),
-            QuizOption("Чтобы ускорить работу с линейно разделимыми данными", false),
-            QuizOption("Чтобы уменьшить число опорных векторов до нуля", false),
-            QuizOption("Это чисто техническая оптимизация, не влияющая на форму границы", false)
+            QuizOption(
+                "Границу определяют только опорные векторы, остальные наблюдения после обучения не нужны — тогда как k-NN хранит всю базу целиком",
+                true
+            ),
+            QuizOption("SVM хранит только часть признаков, отбрасывая неинформативные", false),
+            QuizOption("SVM сжимает данные, усредняя близкие наблюдения", false),
+            QuizOption("Разреженность означает, что матрица признаков содержит много нулей", false)
         ),
-        "Функция ядра вычисляет скалярное произведение в новом пространстве напрямую по исходным координатам — без явного перехода в это пространство."
+        "Hinge loss равна точно нулю для объектов, классифицированных правильно и лежащих за " +
+            "пределами зазора: они не вносят вклада в градиент и входят в решение с нулевым " +
+            "коэффициентом. У логистической регрессии функция потерь никогда не обращается в " +
+            "ноль, поэтому там на решение влияют все объекты."
     ),
     QuizQuestion(
-        "Когда стоит выбрать RBF-ядро вместо линейного?",
+        "Модель выдала для сессии значение решающей функции 2,7. Можно ли считать, что вероятность аномалии около 0,97?",
         listOf(
-            QuizOption("Когда классы нельзя разделить прямой линией — нужна изогнутая граница", true),
-            QuizOption("Всегда — RBF гарантированно лучше линейного", false),
-            QuizOption("Только если данных очень много", false),
-            QuizOption("RBF и линейное ядро дают одинаковый результат", false)
+            QuizOption(
+                "Нет. Это расстояние до границы со знаком, а не вероятность; для вероятности нужна отдельная калибровка",
+                true
+            ),
+            QuizOption("Да, выход SVM уже является вероятностью после применения ядра", false),
+            QuizOption("Да, если значение поделить на ширину зазора", false),
+            QuizOption("Нет, потому что вероятность не может превышать единицу, нужно обрезать до 1,0", false)
         ),
-        "Линейное ядро строит только прямую границу. RBF-ядро позволяет границе изгибаться вокруг локальных скоплений точек."
+        "Выход SVM — величина без вероятностного смысла: 2,7 означает «далеко за границей и " +
+            "уверенно». Чтобы получить вероятность, поверх выхода обучают одномерную " +
+            "логистическую регрессию (калибровка Платта). Без этого шага любая политика вида " +
+            "«блокировать при риске выше 0,3» на сыром выходе SVM не имеет смысла."
     )
 )
 
+/**
+ * Экран «Решение задачи» для метода опорных векторов.
+ *
+ * Показывает три прогона: эталонный, с малым C и с большим C на данных с
+ * выбросами — потому что сравнение именно этих колонок и есть вывод темы.
+ * Все числа считаются на лету через [SvmLab].
+ */
 @Composable
-fun SvmResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit, onOpenChat: (String) -> Unit = {}) {
+fun SvmResult(
+    modifier: Modifier = Modifier,
+    title: String?,
+    onBack: () -> Unit,
+    onOpenChat: (String) -> Unit = {}
+) {
     val textColor = Color.White
-    val accent = Color(0xFFB5179E)
+    val accent = Color(0xFFFFD93D)
+    val topicTitle = title ?: "Метод опорных векторов"
 
-    val model = remember { SvmLab.train(c = 1f, kernel = SvmKernel.LINEAR, gamma = 0.3f, iterations = 800) }
-    val accuracy = remember { SvmLab.accuracy(model, SvmLab.testSet) }
-    val svCount = remember { SvmLab.supportVectorCount(model) }
+    // эталон: 10% выбросов, C = 1
+    val train = remember { SvmLab.trainSet(SvmLab.DEFAULT_OUTLIERS) }
+    val test = remember { SvmLab.testSet(SvmLab.DEFAULT_OUTLIERS) }
+    val model = remember(train) {
+        SvmLab.train(SvmLab.DEFAULT_C, SvmKernel.LINEAR, 0.0, SvmLab.DEFAULT_ITERATIONS, train)
+    }
+    val acc = remember(model) { SvmLab.accuracy(test, model) }
+    val svCount = remember(model) { model.supportVectorCount() }
+    val margin = remember(model) { model.marginWidth() }
+    val weights = remember(model) { model.linearWeights() }
+
+    // грязная выборка: 25% выбросов, три значения C
+    val dirtyTrain = remember { SvmLab.trainSet(0.25) }
+    val dirtyTest = remember { SvmLab.testSet(0.25) }
+    val dirtyLow = remember(dirtyTrain) {
+        SvmLab.train(0.2, SvmKernel.LINEAR, 0.0, SvmLab.DEFAULT_ITERATIONS, dirtyTrain)
+    }
+    val dirtyMid = remember(dirtyTrain) {
+        SvmLab.train(1.0, SvmKernel.LINEAR, 0.0, SvmLab.DEFAULT_ITERATIONS, dirtyTrain)
+    }
+    val dirtyHigh = remember(dirtyTrain) {
+        SvmLab.train(25.0, SvmKernel.LINEAR, 0.0, SvmLab.DEFAULT_ITERATIONS, dirtyTrain)
+    }
 
     LessonScaffold(
         eyebrow = "Решение задачи",
-        title = title ?: "SVM",
+        title = topicTitle,
         onBack = onBack,
         accent = accent,
         modifier = modifier
     ) {
-        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f))) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f))
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Эталонное решение", color = textColor, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                 Spacer(Modifier.height(8.dp))
-                Text("Параметры: C = 1, ядро — линейное.", color = textColor.copy(alpha = 0.85f), fontSize = 14.sp)
-                Spacer(Modifier.height(4.dp))
                 Text(
-                    "Точность на контрольной выборке: ${(accuracy * 100).roundToInt()}%, опорных векторов: $svCount из ${SvmLab.trainSet.size}",
-                    color = textColor, fontSize = 15.sp, fontWeight = FontWeight.SemiBold
+                    "C = ${SvmLab.DEFAULT_C}, линейное ядро, ${SvmLab.DEFAULT_ITERATIONS} итераций, " +
+                        "${(SvmLab.DEFAULT_OUTLIERS * 100).toInt()}% сессий ночного бэкапа. " +
+                        "Обучение на ${SvmLab.TRAIN_SIZE} сессиях, оценка на ${SvmLab.TEST_SIZE}.",
+                    color = textColor.copy(alpha = 0.85f), fontSize = 13.sp, lineHeight = 18.sp
                 )
                 Spacer(Modifier.height(10.dp))
+                Text(
+                    "Точность = ${"%.4f".format(acc)}",
+                    color = accent, fontSize = 20.sp, fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "Опорных векторов: $svCount из ${SvmLab.TRAIN_SIZE}",
+                    color = textColor, fontSize = 14.sp, fontWeight = FontWeight.SemiBold
+                )
+                if (margin != null && weights != null) {
+                    Text(
+                        "Ширина зазора = ${"%.4f".format(margin)}, " +
+                            "w = (${"%.4f".format(weights[0])}, ${"%.4f".format(weights[1])}), " +
+                            "b = ${"%.4f".format(weights[2])}",
+                        color = textColor.copy(alpha = 0.8f), fontSize = 12.sp, lineHeight = 17.sp
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Чуть больше половины обучающей выборки оказалось опорными векторами — " +
+                        "остальные сессии на положение границы не влияют вовсе и после обучения " +
+                        "не нужны.",
+                    color = textColor.copy(alpha = 0.65f), fontSize = 12.sp, lineHeight = 17.sp
+                )
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f))
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    "Главный вывод: C на выборке с 25% выбросов",
+                    color = textColor, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 21.sp
+                )
+                Spacer(Modifier.height(10.dp))
+
+                CRow("C = 0,2", dirtyLow, dirtyTest, textColor, Color(0xFFFF6B6B))
+                CRow("C = 1,0", dirtyMid, dirtyTest, textColor, Color(0xFF6BCB77))
+                CRow("C = 25", dirtyHigh, dirtyTest, textColor, Color(0xFFFF6B6B))
+
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "Точность не растёт с C монотонно: у неё максимум в середине. При C = 0,2 " +
+                        "зазор раздут и граница слишком груба. При C = 25 модель перестроилась " +
+                        "под ночной бэкап — зазор сузился, опорных векторов почти не осталось, " +
+                        "и на новых сессиях стало хуже.\n\n" +
+                        "Обратите внимание, что ширина зазора и число опорных векторов меняются " +
+                        "монотонно, а точность — нет. Именно поэтому C подбирают перекрёстной " +
+                        "проверкой, а не рассуждением.",
+                    color = textColor.copy(alpha = 0.8f), fontSize = 13.sp, lineHeight = 19.sp
+                )
+                Spacer(Modifier.height(12.dp))
                 AskChatButton(accent = accent, onClick = {
                     onOpenChat(
-                        "Объясни, пожалуйста, простыми словами, почему получился именно такой результат в теме «${title ?: "SVM"}» (Решение задачи).\n\n" +
-                        "Параметры: C = 1, ядро — линейное.\n" +
-                        "Точность на контрольной выборке: ${(accuracy * 100).roundToInt()}%, опорных векторов: $svCount из ${SvmLab.trainSet.size}\n\n" +
-                        "Что означают эти числа и почему получились именно такими?"
+                        "Объясни, пожалуйста, простыми словами, почему получился именно такой " +
+                            "результат в теме «$topicTitle» (Решение задачи).\n\n" +
+                            "Задача: отделение аномального сетевого трафика от легитимного методом " +
+                            "опорных векторов. Два признака — средний размер пакета и доля SYN " +
+                            "без ответа. ${SvmLab.TRAIN_SIZE} сессий на обучение, ${SvmLab.TEST_SIZE} " +
+                            "на контроль. Часть легитимных сессий — ночной бэкап с профилем " +
+                            "эксфильтрации.\n" +
+                            "Эталон (C=1, линейное ядро, 10% выбросов): точность ${"%.4f".format(acc)}, " +
+                            "опорных векторов $svCount из ${SvmLab.TRAIN_SIZE}" +
+                            (if (margin != null) ", ширина зазора ${"%.4f".format(margin)}" else "") + ".\n" +
+                            "На выборке с 25% выбросов: C=0,2 даёт " +
+                            "${"%.4f".format(SvmLab.accuracy(dirtyTest, dirtyLow))}, " +
+                            "C=1 даёт ${"%.4f".format(SvmLab.accuracy(dirtyTest, dirtyMid))}, " +
+                            "C=25 даёт ${"%.4f".format(SvmLab.accuracy(dirtyTest, dirtyHigh))}.\n\n" +
+                            "Почему у точности появляется максимум в середине и что такое зазор?"
                     )
                 })
             }
@@ -98,20 +224,59 @@ fun SvmResult(modifier: Modifier = Modifier, title: String?, onBack: () -> Unit,
 
         Spacer(Modifier.height(16.dp))
 
-        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f))) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f))
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Полученные знания", color = textColor, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                 Spacer(Modifier.height(8.dp))
                 listOf(
-                    "SVM максимизирует зазор между классами, а не просто разделяет их.",
-                    "Только опорные векторы определяют положение границы — остальные точки не влияют.",
-                    "Параметр C управляет компромиссом между шириной зазора и числом ошибок.",
-                    "Kernel trick позволяет строить нелинейные границы без явного перехода в пространство высокой размерности."
-                ).forEach { Text("•  $it", color = textColor.copy(alpha = 0.85f), fontSize = 14.sp, modifier = Modifier.padding(vertical = 2.dp)) }
+                    "Метод ищет границу с максимально широкой пустой полосой вокруг неё: " +
+                        "ширина зазора — это мера запаса прочности к данным, которых не было в обучении.",
+                    "Положение границы определяют только опорные векторы; остальные наблюдения " +
+                        "после обучения не нужны — в этом отличие от метода ближайших соседей.",
+                    "Параметр C задаёт цену нарушения зазора. На разделимых данных он почти " +
+                        "безразличен, на данных с выбросами у него есть оптимум, и большое C вредит.",
+                    "Выход SVM — расстояние до границы со знаком, а не вероятность; " +
+                        "для вероятностной политики требуется отдельная калибровка."
+                ).forEach {
+                    Text(
+                        "•  $it",
+                        color = textColor.copy(alpha = 0.85f), fontSize = 13.sp,
+                        lineHeight = 18.sp, modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
             }
         }
 
         Spacer(Modifier.height(20.dp))
-        QuizSection(questions = svmQuiz, textColor = textColor, nodeId = "svm")
+        QuizSection(questions = svmQuizIb, textColor = textColor, nodeId = "svm")
+    }
+}
+
+@Composable
+private fun CRow(
+    label: String,
+    model: SvmLab.SvmModel,
+    test: List<FlowSample>,
+    textColor: Color,
+    color: Color
+) {
+    val acc = SvmLab.accuracy(test, model)
+    val sv = model.supportVectorCount()
+    val margin = model.marginWidth()
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, color = color, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.width(72.dp))
+        Text(
+            "точность ${"%.4f".format(acc)}   опорных $sv" +
+                (if (margin != null) "   зазор ${"%.3f".format(margin)}" else ""),
+            color = textColor.copy(alpha = 0.85f), fontSize = 12.sp, lineHeight = 17.sp,
+            modifier = Modifier.weight(1f)
+        )
     }
 }

@@ -1,29 +1,42 @@
 package com.eduappml.ui.knn
 
-import androidx.compose.ui.graphics.Color
 import kotlin.math.abs
-import kotlin.math.pow
+import kotlin.math.max
 import kotlin.math.sqrt
-import kotlin.random.Random
 
 /**
- * Точка "эталонной задачи" k-NN: классификация фрукта по двум признакам —
- * сладость (0..10) и размер (0..10). Три класса: Яблоко / Апельсин / Лимон.
+ * Метод k ближайших соседей на задаче триажа алертов в SOC: новый алерт
+ * классифицируется по k самым похожим случаям из базы разобранных.
  *
- * Датасет полностью синтетический и генерируется на лету с фиксированным seed,
- * поэтому одинаков при каждом запуске приложения. Никакого реального обучения
- * модели на устройстве не происходит — это учебная симуляция k-NN поверх
- * заранее заданных точек.
+ * Три вердикта: ложное срабатывание, подозрительно, подтверждённый инцидент.
+ *
+ * Два признака СПЕЦИАЛЬНО оставлены в разных единицах:
+ *   0 — events    число событий в алерте, 0..500
+ *   1 — offHours  доля активности вне рабочего времени, 0..1
+ *
+ * ГЛАВНЫЙ УЧЕБНЫЙ СЮЖЕТ — масштаб признаков. Разброс числа событий в базе
+ * около 128, разброс доли нерабочего времени около 0.25: отношение примерно
+ * 513, а отношение вкладов в КВАДРАТ расстояния — больше 263 тысяч. Без
+ * нормализации второй признак не участвует в решении вообще, и карта решений
+ * распадается на вертикальные полосы. Точность при этом падает всего с 0.86
+ * до 0.80 — то есть ошибка выглядит совершенно безобидно.
+ *
+ * ВНИМАНИЕ ПРИ ПРАВКАХ. Перечисления [KnnMetric] и [KnnWeighting] объявлены
+ * здесь, но используются ТАКЖЕ в KnnLabMilitary.kt и KnnInteractiveMilitary.kt.
+ * В `KnnLabMilitary.distance` стоит исчерпывающий `when` по [KnnMetric] — при
+ * добавлении нового значения его нужно дополнять там же, иначе сборка встанет.
+ * Значение CHEBYSHEV было добавлено вместе с этой темой, и соответствующая
+ * ветка в KnnLabMilitary.kt дописана.
+ *
+ * Генератор — тот же LCG с константами java.util.Random, что и в питоновском
+ * листинге раздела «Код»: база алертов побитово совпадает с уроком.
  */
-data class FruitPoint(
-    val sweetness: Float,
-    val size: Float,
-    val label: String
-)
+class AlertCase(val x: DoubleArray, val label: Int)
 
 enum class KnnMetric(val label: String) {
     EUCLIDEAN("Евклидово"),
-    MANHATTAN("Манхэттенское")
+    MANHATTAN("Манхэттенское"),
+    CHEBYSHEV("Чебышёва")
 }
 
 enum class KnnWeighting(val label: String) {
@@ -33,103 +46,249 @@ enum class KnnWeighting(val label: String) {
 
 object KnnLab {
 
-    const val FEATURE_MIN = 0f
-    const val FEATURE_MAX = 10f
+    const val N_FEAT = 2
+    const val CLASS_COUNT = 3
 
-    val classLabels = listOf("Яблоко", "Апельсин", "Лимон")
+    const val EVENTS_MAX = 500.0
 
-    val classColors: Map<String, Color> = mapOf(
-        "Яблоко" to Color(0xFFEF5350),
-        "Апельсин" to Color(0xFFFFA726),
-        "Лимон" to Color(0xFFDCE775)
+    val classNames = listOf("Ложное срабатывание", "Подозрительно", "Подтверждённый инцидент")
+    val classShort = listOf("ложное", "подозр.", "инцидент")
+
+    val featureNames = listOf("Число событий", "Доля нерабочего времени")
+
+    // --- значения по умолчанию, подтверждённые симуляцией ---
+    const val DEFAULT_K = 7
+    const val DEFAULT_NOISE = 0.0
+    const val DEFAULT_BASE_SIZE = 240
+    const val DEFAULT_NORMALIZE = true
+    val DEFAULT_METRIC = KnnMetric.EUCLIDEAN
+    val DEFAULT_WEIGHTING = KnnWeighting.UNIFORM
+
+    const val K_MIN = 1
+    const val K_MAX = 41
+    const val NOISE_MIN = 0.0
+    const val NOISE_MAX = 0.30
+    const val BASE_MIN = 10
+    const val BASE_MAX = 400
+
+    const val TEST_SIZE = 150
+
+    /** (среднее событий, разброс, среднее доли нерабочего времени, разброс) */
+    private val CLASSES = arrayOf(
+        doubleArrayOf(70.0, 45.0, 0.22, 0.16),
+        doubleArrayOf(210.0, 70.0, 0.50, 0.18),
+        doubleArrayOf(330.0, 80.0, 0.74, 0.16)
     )
 
-    /** Обучающая выборка — одна и та же на каждом запуске (seed = 42). */
-    val trainSet: List<FruitPoint> by lazy { generate(seed = 42, perClass = 24) }
+    // ------------------------------------------------------------------
+    // База алертов
+    // ------------------------------------------------------------------
 
-    /** Отложенная (контрольная) выборка — для честной проверки точности. */
-    val testSet: List<FruitPoint> by lazy { generate(seed = 777, perClass = 12) }
-
-    /** Рекомендуемые "эталонные" гиперпараметры, которые показываются в блоке решения. */
-    val referenceK = 5
-    val referenceMetric = KnnMetric.EUCLIDEAN
-    val referenceWeighting = KnnWeighting.DISTANCE
-
-    private fun generate(seed: Int, perClass: Int): List<FruitPoint> {
-        val rnd = Random(seed)
-        // (сладость, размер) — центр облака точек для каждого класса
-        val centers = listOf(
-            "Яблоко" to (7.3f to 6.2f),
-            "Апельсин" to (6.2f to 8.4f),
-            "Лимон" to (2.2f to 4.0f)
-        )
-        val points = mutableListOf<FruitPoint>()
-        centers.forEach { (label, center) ->
-            repeat(perClass) {
-                val sweetness = (center.first + (rnd.nextFloat() * 2.6f - 1.3f)).coerceIn(FEATURE_MIN, FEATURE_MAX)
-                val size = (center.second + (rnd.nextFloat() * 2.6f - 1.3f)).coerceIn(FEATURE_MIN, FEATURE_MAX)
-                points.add(FruitPoint(sweetness, size, label))
-            }
+    private class Lcg(seed: Long) {
+        private var s: Long = seed and 0xFFFFFFFFFFFFL
+        fun nextDouble(): Double {
+            s = (s * 0x5DEECE66DL + 0xBL) and 0xFFFFFFFFFFFFL
+            return (s ushr 24).toDouble() / (1L shl 24).toDouble()
         }
-        return points
+        fun gauss(mu: Double, sd: Double): Double {
+            var acc = 0.0
+            for (i in 0 until 6) acc += nextDouble()
+            return mu + sd * (acc - 3.0) / sqrt(0.5)
+        }
     }
 
-    private fun distance(a: FruitPoint, sweetness: Float, size: Float, metric: KnnMetric): Float =
-        when (metric) {
-            KnnMetric.EUCLIDEAN -> sqrt((a.sweetness - sweetness).pow(2) + (a.size - size).pow(2))
-            KnnMetric.MANHATTAN -> abs(a.sweetness - sweetness) + abs(a.size - size)
+    private fun clamp(v: Double, lo: Double, hi: Double): Double =
+        if (v < lo) lo else if (v > hi) hi else v
+
+    /**
+     * [noise] — доля алертов с испорченным вердиктом: аналитик ошибся при
+     * разборе. В реальной базе SOC такие записи есть всегда, и именно из-за
+     * них выбор k перестаёт быть безразличным.
+     */
+    fun generate(seed: Long, n: Int, noise: Double): List<AlertCase> {
+        val rnd = Lcg(seed)
+        val out = ArrayList<AlertCase>(n)
+        for (i in 0 until n) {
+            var c = (rnd.nextDouble() * 3).toInt()
+            if (c > 2) c = 2
+            val p = CLASSES[c]
+            val events = clamp(rnd.gauss(p[0], p[1]), 0.0, EVENTS_MAX)
+            val offHours = clamp(rnd.gauss(p[2], p[3]), 0.0, 1.0)
+            var label = c
+            if (rnd.nextDouble() < noise) {
+                label = (rnd.nextDouble() * 3).toInt()
+                if (label > 2) label = 2
+            }
+            out.add(AlertCase(doubleArrayOf(events, offHours), label))
         }
+        return out
+    }
 
-    data class Neighbor(val point: FruitPoint, val distance: Float)
+    fun baseSet(size: Int, noise: Double): List<AlertCase> = generate(42L, size, noise)
+    fun testSet(): List<AlertCase> = generate(777L, TEST_SIZE, 0.0)
 
-    /** Возвращает k ближайших соседей точки (sweetness, size) в наборе [data]. */
-    fun nearestNeighbors(
-        sweetness: Float,
-        size: Float,
+    // ------------------------------------------------------------------
+    // Масштабы признаков
+    // ------------------------------------------------------------------
+
+    /**
+     * Масштабы для нормализации — считаются ТОЛЬКО по базе, без учёта
+     * контрольной выборки: масштабы являются частью модели, и подсматривать
+     * в проверочные данные нельзя (это была бы утечка).
+     *
+     * При выключенной нормализации оба масштаба равны единице, и расстояние
+     * определяется почти исключительно числом событий.
+     */
+    fun scales(base: List<AlertCase>, normalize: Boolean): DoubleArray {
+        if (!normalize || base.isEmpty()) return doubleArrayOf(1.0, 1.0)
+        val out = DoubleArray(N_FEAT)
+        for (j in 0 until N_FEAT) {
+            var m = 0.0
+            for (c in base) m += c.x[j]
+            m /= base.size
+            var v = 0.0
+            for (c in base) v += (c.x[j] - m) * (c.x[j] - m)
+            out[j] = max(sqrt(v / base.size), 1e-9)
+        }
+        return out
+    }
+
+    // ------------------------------------------------------------------
+    // Расстояние и классификация
+    // ------------------------------------------------------------------
+
+    fun distance(a: DoubleArray, b: DoubleArray, sc: DoubleArray, metric: KnnMetric): Double {
+        val d0 = (a[0] - b[0]) / sc[0]
+        val d1 = (a[1] - b[1]) / sc[1]
+        return when (metric) {
+            KnnMetric.EUCLIDEAN -> sqrt(d0 * d0 + d1 * d1)
+            KnnMetric.MANHATTAN -> abs(d0) + abs(d1)
+            KnnMetric.CHEBYSHEV -> max(abs(d0), abs(d1))
+        }
+    }
+
+    class Neighbor(val case: AlertCase, val distance: Double)
+
+    fun neighbors(
+        x: DoubleArray,
+        base: List<AlertCase>,
         k: Int,
         metric: KnnMetric,
-        data: List<FruitPoint> = trainSet
+        sc: DoubleArray
     ): List<Neighbor> {
-        if (data.isEmpty()) return emptyList()
-        return data
-            .map { Neighbor(it, distance(it, sweetness, size, metric)) }
+        if (base.isEmpty()) return emptyList()
+        return base
+            .map { Neighbor(it, distance(x, it.x, sc, metric)) }
             .sortedBy { it.distance }
-            .take(k.coerceIn(1, data.size))
+            .take(k.coerceIn(1, base.size))
     }
 
-    /** Классификация точки методом k-NN (условный расчёт "на лету", без обучения модели). */
     fun classify(
-        sweetness: Float,
-        size: Float,
+        x: DoubleArray,
+        base: List<AlertCase>,
         k: Int,
         metric: KnnMetric,
         weighting: KnnWeighting,
-        data: List<FruitPoint> = trainSet
-    ): String {
-        val neighbors = nearestNeighbors(sweetness, size, k, metric, data)
-        if (neighbors.isEmpty()) return classLabels.first()
-
-        val votes = mutableMapOf<String, Float>()
-        neighbors.forEach { n ->
-            val weight = when (weighting) {
-                KnnWeighting.UNIFORM -> 1f
-                KnnWeighting.DISTANCE -> 1f / (n.distance + 0.05f)
+        sc: DoubleArray
+    ): Int {
+        val votes = DoubleArray(CLASS_COUNT)
+        for (nb in neighbors(x, base, k, metric, sc)) {
+            // взвешивание по расстоянию усиливает голос ближнего соседа —
+            // включая ближнего соседа с ОШИБОЧНЫМ вердиктом
+            votes[nb.case.label] += when (weighting) {
+                KnnWeighting.UNIFORM -> 1.0
+                KnnWeighting.DISTANCE -> 1.0 / (nb.distance + 1e-6)
             }
-            votes[n.point.label] = (votes[n.point.label] ?: 0f) + weight
         }
-        return votes.maxByOrNull { it.value }?.key ?: classLabels.first()
+        var best = 0
+        for (c in 1 until CLASS_COUNT) if (votes[c] > votes[best]) best = c
+        return best
     }
 
-    /** Точность на отложенной выборке при заданных гиперпараметрах (0f..1f). */
-    fun evaluateAccuracy(
+    /** Голоса по классам — нужны, чтобы показать разбор конкретного алерта. */
+    fun votes(
+        x: DoubleArray,
+        base: List<AlertCase>,
         k: Int,
         metric: KnnMetric,
-        weighting: KnnWeighting
-    ): Float {
-        if (testSet.isEmpty()) return 0f
-        val correct = testSet.count { test ->
-            classify(test.sweetness, test.size, k, metric, weighting, trainSet) == test.label
+        weighting: KnnWeighting,
+        sc: DoubleArray
+    ): DoubleArray {
+        val votes = DoubleArray(CLASS_COUNT)
+        for (nb in neighbors(x, base, k, metric, sc)) {
+            votes[nb.case.label] += when (weighting) {
+                KnnWeighting.UNIFORM -> 1.0
+                KnnWeighting.DISTANCE -> 1.0 / (nb.distance + 1e-6)
+            }
         }
-        return correct.toFloat() / testSet.size
+        return votes
+    }
+
+    // ------------------------------------------------------------------
+    // Оценка
+    // ------------------------------------------------------------------
+
+    fun accuracy(
+        test: List<AlertCase>,
+        base: List<AlertCase>,
+        k: Int,
+        metric: KnnMetric,
+        weighting: KnnWeighting,
+        sc: DoubleArray
+    ): Double {
+        if (test.isEmpty()) return 0.0
+        var ok = 0
+        for (c in test) {
+            if (classify(c.x, base, k, metric, weighting, sc) == c.label) ok++
+        }
+        return ok.toDouble() / test.size
+    }
+
+    /** Матрица ошибок 3x3: строка — истинный класс, столбец — предсказанный. */
+    fun confusion(
+        test: List<AlertCase>,
+        base: List<AlertCase>,
+        k: Int,
+        metric: KnnMetric,
+        weighting: KnnWeighting,
+        sc: DoubleArray
+    ): Array<IntArray> {
+        val m = Array(CLASS_COUNT) { IntArray(CLASS_COUNT) }
+        for (c in test) {
+            val p = classify(c.x, base, k, metric, weighting, sc)
+            m[c.label][p]++
+        }
+        return m
+    }
+
+    /**
+     * Карта решений: предсказанный класс для каждой ячейки сетки.
+     * Именно она распадается на вертикальные полосы при выключенной
+     * нормализации — цвет перестаёт зависеть от вертикальной координаты.
+     */
+    fun decisionMap(
+        base: List<AlertCase>,
+        k: Int,
+        metric: KnnMetric,
+        weighting: KnnWeighting,
+        sc: DoubleArray,
+        steps: Int = 26
+    ): Array<IntArray> {
+        val map = Array(steps) { IntArray(steps) }
+        for (gx in 0 until steps) {
+            val events = (gx + 0.5) / steps * EVENTS_MAX
+            for (gy in 0 until steps) {
+                val offHours = (gy + 0.5) / steps
+                map[gx][gy] = classify(doubleArrayOf(events, offHours), base, k, metric, weighting, sc)
+            }
+        }
+        return map
+    }
+
+    /** Во сколько раз разброс первого признака больше разброса второго —
+     *  число, которое стоит за всем сюжетом про масштаб. */
+    fun scaleRatio(base: List<AlertCase>): Double {
+        val sc = scales(base, true)
+        return sc[0] / sc[1]
     }
 }

@@ -1,102 +1,345 @@
-## Программная реализация градиентного бустинга
+## Программная реализация
 
-### Реализация на Python
+### Реализация с нуля на Python
 
-Упрощённый градиентный бустинг для регрессии на "пеньках" (деревья глубины 1):
-
-```python
-import numpy as np
-
-
-class Stump:
-    """Дерево глубины 1: один порог по одному признаку."""
-    def fit(self, x, residuals):
-        best_sse, best_threshold = np.inf, None
-        for t in np.unique(x):
-            left = residuals[x <= t]
-            right = residuals[x > t]
-            if len(left) == 0 or len(right) == 0:
-                continue
-            sse = np.sum((left - left.mean()) ** 2) + np.sum((right - right.mean()) ** 2)
-            if sse < best_sse:
-                best_sse, best_threshold = sse, t
-                self.left_value = left.mean()
-                self.right_value = right.mean()
-        self.threshold = best_threshold
-        return self
-
-    def predict(self, x):
-        return np.where(x <= self.threshold, self.left_value, self.right_value)
-
-
-class GradientBoostingRegressor:
-    def __init__(self, n_estimators=50, learning_rate=0.1):
-        self.n_estimators = n_estimators
-        self.learning_rate = learning_rate
-        self.trees = []
-
-    def fit(self, x, y):
-        x = np.array(x, dtype=float)
-        y = np.array(y, dtype=float)
-        self.f0 = y.mean()
-        predictions = np.full_like(y, self.f0)
-
-        for _ in range(self.n_estimators):
-            residuals = y - predictions            # антиградиент для MSE — просто остаток
-            tree = Stump().fit(x, residuals)
-            predictions += self.learning_rate * tree.predict(x)
-            self.trees.append(tree)
-        return self
-
-    def predict(self, x):
-        x = np.array(x, dtype=float)
-        result = np.full_like(x, self.f0)
-        for tree in self.trees:
-            result += self.learning_rate * tree.predict(x)
-        return result
-```
-
-Пример использования — тот же датасет «дальность → расход топлива», что и в интерактиве:
+Весь градиентный бустинг — это цикл на десять строк вокруг обычного
+регрессионного дерева. Ниже полный код эталонного прогона; кроме `math`,
+ничего не требуется. Генератор псевдослучайных чисел тот же, что в
+приложении, поэтому листинг выдаёт ровно те числа, которые показывает экран.
 
 ```python
-distances = [32.1, 48.5, 61.0, 75.4, 90.2, 110.7]
-fuel = [72.9, 105.3, 128.6, 155.1, 183.4, 220.8]
+import math
 
-model = GradientBoostingRegressor(n_estimators=40, learning_rate=0.15)
-model.fit(distances, fuel)
-model.predict([75])
+ # ---------- данные, совпадающие с приложением ----------
+MASK = (1 << 48) - 1
+
+class Lcg:
+    """Тот же LCG, что в java.util.Random, но без скремблирования сида."""
+    def __init__(self, seed):
+        self.s = seed & MASK
+    def next_double(self):
+        self.s = (self.s * 0x5DEECE66D + 0xB) & MASK
+        return (self.s >> 24) / float(1 << 24)
+
+DWELL_MAX = 120.0
+STEP_DAY = 60.0
+
+def true_damage(d):
+    """Ущерб в млн руб. Быстрый рост в первые недели, пологий линейный рост,
+    и РАЗРЫВ на 60 днях — сработала шифровальная нагрузка."""
+    v = 0.8 + 6.5 * (1.0 - math.exp(-d / 18.0)) + 0.02 * d
+    if d > STEP_DAY:
+        v += 3.5
+    return v
+
+def generate(seed, n, noise):
+    rnd = Lcg(seed)
+    out = []
+    for _ in range(n):
+        d = rnd.next_double() * DWELL_MAX
+        out.append((d, true_damage(d) + (rnd.next_double() * 2.0 - 1.0) * noise))
+    return out
+
+ # ---------- регрессионное дерево по остаткам ----------
+class Node:
+    def __init__(self, t=0.0, l=None, r=None, v=None):
+        self.t, self.l, self.r, self.v = t, l, r, v
+    @property
+    def leaf(self):
+        return self.v is not None
+
+def build(xs, res, idx, depth, min_leaf):
+    """Разрез ищется по максимуму sumL^2/nL + sumR^2/nR — это эквивалентно
+    минимуму SSE, но считается за один проход по отсортированным значениям."""
+    n = len(idx)
+    total = sum(res[i] for i in idx)
+    if depth == 0 or n < 2 * min_leaf:
+        return Node(v=total / n)
+    order = sorted(idx, key=lambda i: xs[i])
+    best_gain, best_t, best_k = -1.0, 0.0, -1
+    left_sum = 0.0
+    for k in range(n - 1):
+        left_sum += res[order[k]]
+        if xs[order[k]] == xs[order[k + 1]]:
+            continue
+        nl, nr = k + 1, n - k - 1
+        if nl < min_leaf or nr < min_leaf:
+            continue
+        right_sum = total - left_sum
+        gain = left_sum * left_sum / nl + right_sum * right_sum / nr
+        if gain > best_gain:
+            best_gain, best_k = gain, k
+            best_t = (xs[order[k]] + xs[order[k + 1]]) / 2.0
+    if best_k < 0:
+        return Node(v=total / n)
+    left = [i for i in order if xs[i] <= best_t]
+    right = [i for i in order if xs[i] > best_t]
+    return Node(best_t,
+                build(xs, res, left, depth - 1, min_leaf),
+                build(xs, res, right, depth - 1, min_leaf))
+
+def tree_predict(node, x):
+    while not node.leaf:
+        node = node.l if x <= node.t else node.r
+    return node.v
+
+ # ---------- сам бустинг ----------
+def train(data, test, n_est, lr, depth, min_leaf):
+    """Начальное приближение — среднее. Дальше на каждой итерации:
+    остатки -> дерево по ним -> прибавили с коэффициентом lr."""
+    xs = [p[0] for p in data]
+    ys = [p[1] for p in data]
+    f0 = sum(ys) / len(ys)
+    pred = [f0] * len(data)
+    tpred = [f0] * len(test)
+    trees, hist_tr, hist_te = [], [], []
+    idx = list(range(len(data)))
+    for _ in range(n_est):
+        res = [ys[i] - pred[i] for i in idx]          # для MSE остаток = антиградиент
+        t = build(xs, res, idx, depth, min_leaf)
+        trees.append(t)
+        for i in idx:
+            pred[i] += lr * tree_predict(t, xs[i])
+        for i in range(len(test)):
+            tpred[i] += lr * tree_predict(t, test[i][0])
+        hist_tr.append(sum((ys[i] - pred[i]) ** 2 for i in idx) / len(idx))
+        hist_te.append(sum((test[i][1] - tpred[i]) ** 2 for i in range(len(test))) / len(test))
+    return f0, trees, hist_tr, hist_te
+
+def predict(f0, trees, lr, x):
+    p = f0
+    for t in trees:
+        p += lr * tree_predict(t, x)
+    return p
+
+ # ---------- эталонный прогон ----------
+TRAIN, TEST, NOISE = 40, 40, 2.2
+N_EST, LR, DEPTH, MIN_LEAF = 65, 0.10, 1, 3
+
+tr = generate(42, TRAIN, NOISE)
+te = generate(909, TEST, NOISE)
+
+f0, trees, htr, hte = train(tr, te, N_EST, LR, DEPTH, MIN_LEAF)
+
+mean = sum(y for _, y in tr) / TRAIN
+const_mse = sum((mean - y) ** 2 for _, y in te) / TEST
+
+n = TRAIN
+sx = sum(x for x, _ in tr); sy = sum(y for _, y in tr)
+sxx = sum(x * x for x, _ in tr); sxy = sum(x * y for x, y in tr)
+k = (n * sxy - sx * sy) / (n * sxx - sx * sx)
+b = (sy - k * sx) / n
+line_mse = sum((k * x + b - y) ** 2 for x, y in te) / TEST
+
+print("эталон: %d итераций, шаг %.2f, глубина %d" % (N_EST, LR, DEPTH))
+print("  обучающая  %.4f" % htr[-1])
+print("  контрольная %.4f" % hte[-1])
+print("  константа   %.4f" % const_mse)
+print("  прямая      %.4f  (наклон %.4f, сдвиг %.4f)" % (line_mse, k, b))
+print()
+print("порог первого дерева: %.2f дня (настоящий разрыв на %.0f)" % (trees[0].t, STEP_DAY))
+print("скачок между 55 и 65 днями:")
+print("  модель   %.3f" % (predict(f0, trees, LR, 65.0) - predict(f0, trees, LR, 55.0)))
+print("  истина   %.3f" % (true_damage(65.0) - true_damage(55.0)))
+print("  прямая   %.3f" % (k * 10.0))
+print()
+print("как падает ошибка")
+for m in (1, 5, 10, 20, 40, 65):
+    print("  %2d итер: обучающая %7.4f  контрольная %7.4f" % (m, htr[m - 1], hte[m - 1]))
+print()
+print("размен шага и числа итераций (глубина 1, до 200 итераций)")
+for lr in (1.0, 0.5, 0.2, 0.1, 0.05):
+    _, _, a, c = train(tr, te, 200, lr, 1, MIN_LEAF)
+    best = min(range(len(c)), key=lambda i: c[i])
+    print("  шаг %.2f: минимум %.4f на %3d-й; к 200-й %.4f; произведение %.1f"
+          % (lr, c[best], best + 1, c[-1], lr * (best + 1)))
+print()
+print("что делает глубина (шаг 1.0, до 200 итераций)")
+for d in (1, 2, 3):
+    a, c = train(tr, te, 200, 1.0, d, MIN_LEAF)[2:]
+    best = min(range(len(c)), key=lambda i: c[i])
+    print("  глубина %d: минимум %.4f на %3d-й; к 200-й %.4f; обучающая %.4f"
+          % (d, c[best], best + 1, c[-1], a[-1]))
 ```
 
-### Готовое решение: scikit-learn / XGBoost / LightGBM
+Вывод:
+
+```
+эталон: 65 итераций, шаг 0.10, глубина 1
+  обучающая  0.8845
+  контрольная 1.9526
+  константа   19.3320
+  прямая      2.7647  (наклон 0.0923, сдвиг 3.3172)
+
+порог первого дерева: 58.01 дня (настоящий разрыв на 60)
+скачок между 55 и 65 днями:
+  модель   3.788
+  истина   3.830
+  прямая   0.923
+
+как падает ошибка
+   1 итер: обучающая 11.8510  контрольная 16.9590
+   5 итер: обучающая  6.8663  контрольная 10.1720
+  10 итер: обучающая  3.8186  контрольная  6.0113
+  20 итер: обучающая  1.7222  контрольная  3.1777
+  40 итер: обучающая  0.9757  контрольная  2.0803
+  65 итер: обучающая  0.8845  контрольная  1.9526
+
+размен шага и числа итераций (глубина 1, до 200 итераций)
+  шаг 1.00: минимум 2.1980 на  38-й; к 200-й 2.5118; произведение 38.0
+  шаг 0.50: минимум 1.9946 на  18-й; к 200-й 2.1809; произведение 9.0
+  шаг 0.20: минимум 1.9487 на  35-й; к 200-й 1.9805; произведение 7.0
+  шаг 0.10: минимум 1.9526 на  65-й; к 200-й 1.9687; произведение 6.5
+  шаг 0.05: минимум 1.9528 на 185-й; к 200-й 1.9572; произведение 9.2
+
+что делает глубина (шаг 1.0, до 200 итераций)
+  глубина 1: минимум 2.1980 на  38-й; к 200-й 2.5118; обучающая 0.1352
+  глубина 2: минимум 1.8919 на   2-й; к 200-й 3.0115; обучающая 0.0531
+  глубина 3: минимум 2.0363 на   1-й; к 200-й 3.0126; обучающая 0.0531
+```
+
+Три места, на которые стоит посмотреть внимательно.
+
+**Строка `res = [ys[i] - pred[i] for i in idx]` — это и есть весь
+«градиентный» в названии метода.** Для квадратичной ошибки антиградиент по
+предсказанию равен остатку, поэтому отдельного вычисления производных в коде
+нет. Если поменять функцию потерь, изменится только эта строка: для
+абсолютной ошибки там окажется знак остатка, для классификации — разность
+между меткой и предсказанной вероятностью. Всё остальное останется как есть.
+
+**Коэффициент `lr` умножает вклад каждого дерева и никогда не меняется
+задним числом.** Дерево, попавшее в сумму, остаётся там навсегда со своим
+весом. Отсюда несимметричность с лесом: лес усредняет и потому прощает
+отдельному дереву ошибку, бустинг складывает и потому не прощает.
+
+**Разрез ищется по максимуму `left_sum² / nl + right_sum² / nr`.** Это та же
+задача, что минимизация суммы квадратов отклонений внутри половин, но
+записанная так, что считается за один проход: сумма слева накапливается по
+ходу движения, сумма справа получается вычитанием из общей. Прямая
+реализация через SSE пересчитывала бы обе половины для каждого кандидата в
+порог и была бы квадратичной по числу наблюдений.
+
+Обратите внимание на первую строку вывода про пороги: `58.01`. Никакой
+информации про шестидесятый день в алгоритм не заложено. Константное
+приближение занижает ущерб на длинных инцидентах и завышает на коротких,
+поэтому остатки меняют знак — и самый крупный перепад в них приходится
+ровно на границу срабатывания шифровальщика.
+
+### Готовое решение
+
+На практике бустинг берут из библиотеки. Базовая реализация есть в
+`scikit-learn`, и её интерфейс покрывает всё, что делает листинг выше.
 
 ```python
 from sklearn.ensemble import GradientBoostingRegressor
 
-model = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, max_depth=2)
+model = GradientBoostingRegressor(
+    n_estimators=65,
+    learning_rate=0.10,
+    max_depth=1,          # пни: признак один, большего не нужно
+    min_samples_leaf=3,
+    random_state=0
+)
 model.fit(X_train, y_train)
-model.predict(X_test)
 ```
 
-В индустрии для градиентного бустинга чаще используют специализированные библиотеки — `XGBoost`, `LightGBM`, `CatBoost`: они работают на порядки быстрее за счёт гистограммных методов поиска разбиений и умеют работать с миллионами строк.
+Для настоящих задач берут не её, а специализированные библиотеки —
+`XGBoost`, `LightGBM`, `CatBoost`. Они дают то, чего в базовой реализации
+нет: гистограммное разбиение вместо полной сортировки, встроенную работу с
+пропусками, штрафы за сложность дерева прямо в целевой функции и, главное,
+раннюю остановку.
+
+```python
+import lightgbm as lgb
+
+model = lgb.LGBMRegressor(
+    n_estimators=5000,       # заведомо с запасом
+    learning_rate=0.02,      # мелкий шаг — компенсируется числом итераций
+    num_leaves=15,
+    min_child_samples=20,
+    subsample=0.8,           # стохастический бустинг
+    colsample_bytree=0.8
+)
+model.fit(
+    X_train, y_train,
+    eval_set=[(X_valid, y_valid)],
+    callbacks=[lgb.early_stopping(stopping_rounds=100)]
+)
+print("остановились на итерации", model.best_iteration_)
+```
+
+Это и есть рабочий шаблон. Число итераций ставится с запасом и не
+подбирается вручную — его определяет ранняя остановка по отложенной
+выборке. Шаг берут настолько мелким, насколько позволяет время.
+
+Для классификации в безопасности почти всегда нужен ещё один параметр:
+
+```python
+model = lgb.LGBMClassifier(
+    n_estimators=5000,
+    learning_rate=0.02,
+    scale_pos_weight=40.0,   # вредоносных образцов на два порядка меньше
+    metric="average_precision"
+)
+```
+
+Метрика здесь тоже не случайная. При сильном дисбалансе классов accuracy не
+значит ничего, а ROC-AUC вводит в заблуждение, потому что почти вся площадь
+под кривой набирается в области, которая на практике не используется.
+Average precision — площадь под кривой точности и полноты — отражает
+реальное качество отбора кандидатов.
 
 ### А что реально считает интерактив в этом приложении
 
-```kotlin
-fun trainBoosting(data: List<FuelPoint>, nEstimators: Int, learningRate: Float): List<Stump> {
-    val f0 = data.map { it.fuel }.average().toFloat()
-    var predictions = FloatArray(data.size) { f0 }
-    val trees = mutableListOf<Stump>()
+Kotlin-версия в `GbLab.kt` повторяет листинг строка в строку, включая LCG
+без скремблирования сида. Одно место написано иначе — накопление истории
+ошибок.
 
-    repeat(nEstimators) {
-        val residuals = data.mapIndexed { i, p -> p.fuel - predictions[i] }
-        val stump = fitStump(data.map { it.distance }, residuals)
-        trees.add(stump)
-        predictions = predictions.mapIndexed { i, pred -> pred + learningRate * stump.predict(data[i].distance) }.toFloatArray()
+```kotlin
+for (m in 0 until nEstimators) {
+    val residuals = DoubleArray(n) { ys[it] - pred[it] }
+    val tree = buildTree(xs, residuals, idx, depth, minLeaf)
+    trees.add(tree)
+
+    var trSum = 0.0
+    for (i in 0 until n) {
+        pred[i] += learningRate * treePredict(tree, xs[i])
+        val e = ys[i] - pred[i]
+        trSum += e * e
     }
-    return trees
+    trainMse[m] = trSum / n
+    // то же самое для контрольной выборки, тем же одним проходом
 }
 ```
 
+Предсказания обеих выборок обновляются на месте, и ошибка считается из уже
+обновлённых значений в том же цикле. Прямолинейная реализация на каждой
+итерации прогоняла бы все m деревьев по всем точкам заново — то есть делала
+бы работу, квадратичную по числу итераций. При двухстах итерациях и
+восьмидесяти точках разница в сто раз, и она прекрасно ощущается пальцем на
+ползунке.
+
 ### Важная оговорка
 
-Учебная реализация ограничена "пеньками" (глубина 1) и полным перебором порогов — как и в теме «Дерево решений», промышленные библиотеки используют гистограммные приближения для скорости на больших данных.
+Все числа этой темы получены на синтетических данных с известной
+зависимостью. Это сделано затем, чтобы разрыв на шестидесятом дне был не
+предположением, а фактом, и чтобы найденный алгоритмом порог можно было
+сравнить с настоящим.
+
+На реальных данных об инцидентах картина будет другой в трёх отношениях.
+
+Разрыв окажется размазанным. Шифровальная нагрузка срабатывает не ровно на
+шестидесятый день, а когда злоумышленник сочтёт нужным, и в выборке это
+даст плавный переход вместо ступеньки.
+
+Признак будет не один. Ущерб зависит и от отрасли, и от размера компании,
+и от того, какие системы затронуты. Как только признаков станет несколько,
+глубина деревьев перестанет быть лишней: именно она позволяет выразить
+взаимодействие между ними.
+
+И самое неприятное: время до обнаружения само по себе не причина, а
+следствие. Инциденты, которые находят поздно, — это в среднем более
+сложные и более целевые атаки, и часть связи объясняется этим, а не
+длительностью как таковой. Модель предсказывает ущерб, но не даёт права
+утверждать, что сокращение dwell time на сорок дней сэкономит ровно
+столько-то. Для такого утверждения нужна не регрессия, а причинный вывод.

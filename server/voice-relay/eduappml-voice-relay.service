@@ -1,0 +1,26 @@
+[Unit]
+Description=EduAppML voice relay (Yandex AI Studio Realtime)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Поправьте User и пути под свой сервер
+User=ubuntu
+WorkingDirectory=/opt/eduappml-voice-relay
+ExecStart=/usr/bin/node /opt/eduappml-voice-relay/server.js
+Restart=always
+RestartSec=3
+Environment=NODE_ENV=production
+# .env читается из WorkingDirectory через dotenv
+StandardOutput=journal
+StandardError=journal
+
+# Небольшое усиление изоляции: сервису нужен только свой каталог и сеть
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

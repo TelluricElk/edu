@@ -2,6 +2,7 @@ package com.eduappml.ui.knn
 
 import androidx.compose.ui.graphics.Color
 import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.random.Random
@@ -74,6 +75,10 @@ object KnnLabMilitary {
         when (metric) {
             KnnMetric.EUCLIDEAN -> sqrt((a.speed - speed).pow(2) + (a.altitude - altitude).pow(2))
             KnnMetric.MANHATTAN -> abs(a.speed - speed) + abs(a.altitude - altitude)
+            // Ветка дописана вместе с переводом темы knn на ИБ-тематику:
+            // в KnnLab.kt к KnnMetric добавлено значение CHEBYSHEV, а этот
+            // when — исчерпывающий, без else. Без этой строки сборка встанет.
+            KnnMetric.CHEBYSHEV -> max(abs(a.speed - speed), abs(a.altitude - altitude))
         }
 
     data class Neighbor(val point: AircraftPoint, val distance: Float)

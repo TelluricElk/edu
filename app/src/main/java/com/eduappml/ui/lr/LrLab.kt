@@ -1,142 +1,223 @@
 package com.eduappml.ui.lr
 
-import kotlin.random.Random
+import kotlin.math.abs
+import kotlin.math.ln
+import kotlin.math.pow
+import kotlin.math.sqrt
 
-data class PricePoint(val area: Float, val price: Float)
+/**
+ * Линейная регрессия на задаче прогноза мощности DDoS-атаки.
+ *
+ * Признак — размер ботнета в тысячах узлов, отклик — пиковая полоса в Гбит/с.
+ * Истинная зависимость, из которой генерируется история: 0.42 Гбит/с на
+ * тысячу узлов плюс 3.5 Гбит/с фона. Хорошо настроенное обучение обязано её
+ * восстановить — это и есть эталонная проверка темы.
+ *
+ * Два учебных сюжета зашиты в данные намеренно.
+ *
+ * 1. МАСШТАБ ПРИЗНАКА. Узлы измеряются десятками тысяч, поэтому градиент по
+ *    наклону на порядки крупнее градиента по свободному члену. Без
+ *    нормализации спуск разваливается уже при скорости обучения 0.0008, с
+ *    нормализацией держит 2.0 — запас примерно в три тысячи раз. Это
+ *    ровно та ловушка, что описана в DEVELOPMENT_NOTES для исходной версии
+ *    темы; здесь она превращена в переключатель, чтобы её можно было увидеть.
+ *
+ * 2. ВЫБРОСЫ. Атаки с амплификацией (усиление через чужие DNS/NTP-серверы)
+ *    дают огромную полосу при малом ботнете, то есть лежат слева и высоко.
+ *    Метод наименьших квадратов не робастен, и при росте их доли наклон
+ *    падает с 0.42 до отрицательных значений. Доля задаётся слайдером.
+ *
+ * Генератор — тот же LCG с константами java.util.Random, что и в питоновском
+ * листинге раздела «Код»: история атак получается побитово одинаковой.
+ */
+class AttackSample(val nodes: Double, val bandwidth: Double)
 
 object LrLab {
 
-    const val AREA_MIN = 30f
-    const val AREA_MAX = 120f
+    const val TRUE_K = 0.42
+    const val TRUE_B = 3.5
+    const val NODES_MIN = 4.0
+    const val NODES_MAX = 120.0
+    const val SAMPLE_COUNT = 160
 
-    /** Обучающая выборка — фиксированный синтетический датасет (seed = 42). */
-    val trainSet: List<PricePoint> by lazy { generate(seed = 42, n = 40) }
+    // --- значения по умолчанию, подтверждённые симуляцией ---
+    const val DEFAULT_LR = 0.08
+    const val DEFAULT_EPOCHS = 120
+    const val DEFAULT_LAMBDA = 0.0
+    const val DEFAULT_AMP_RATE = 0.0
+    const val DEFAULT_NORMALIZE = true
 
-    /** Отложенная (контрольная) выборка. */
-    val testSet: List<PricePoint> by lazy { generate(seed = 777, n = 15) }
+    const val LR_MIN = 1e-5
+    const val LR_MAX = 2.0
+    const val EPOCHS_MIN = 1
+    const val EPOCHS_MAX = 400
+    const val LAMBDA_MIN = 0.0
+    const val LAMBDA_MAX = 2.0
+    const val AMP_MIN = 0.0
+    const val AMP_MAX = 1.0
 
-    private const val TRUE_SLOPE = 1.9f
-    private const val TRUE_INTERCEPT = 12f
+    /** Ботнет, для которого экран показывает прогноз «в понятных единицах». */
+    const val FORECAST_NODES = 50.0
 
-    private fun generate(seed: Int, n: Int): List<PricePoint> {
-        val rnd = Random(seed)
-        return (0 until n).map {
-            val area = AREA_MIN + rnd.nextFloat() * (AREA_MAX - AREA_MIN)
-            val noise = (rnd.nextFloat() * 2f - 1f) * 18f
-            PricePoint(area, TRUE_SLOPE * area + TRUE_INTERCEPT + noise)
+    // ------------------------------------------------------------------
+    // Логарифмический слайдер скорости обучения
+    // ------------------------------------------------------------------
+
+    /**
+     * Позиция слайдера 0..1 в скорость обучения и обратно.
+     *
+     * Диапазон охватывает пять с половиной порядков. На линейном слайдере вся
+     * интересная область «без нормализации» (до 0.0008) уместилась бы в первые
+     * четыре сотых доли его хода — то есть была бы недостижима пальцем.
+     */
+    fun sliderToLr(t: Float): Double {
+        val lo = ln(LR_MIN) / ln(10.0)
+        val hi = ln(LR_MAX) / ln(10.0)
+        return 10.0.pow(lo + t.toDouble() * (hi - lo))
+    }
+
+    fun lrToSlider(lr: Double): Float {
+        val lo = ln(LR_MIN) / ln(10.0)
+        val hi = ln(LR_MAX) / ln(10.0)
+        return ((ln(lr) / ln(10.0) - lo) / (hi - lo)).toFloat()
+    }
+
+    // ------------------------------------------------------------------
+    // Данные
+    // ------------------------------------------------------------------
+
+    private class Lcg(seed: Long) {
+        private var s: Long = seed and 0xFFFFFFFFFFFFL
+        fun nextDouble(): Double {
+            s = (s * 0x5DEECE66DL + 0xBL) and 0xFFFFFFFFFFFFL
+            return (s ushr 24).toDouble() / (1L shl 24).toDouble()
+        }
+        fun gauss(mu: Double, sd: Double): Double {
+            var acc = 0.0
+            for (i in 0 until 6) acc += nextDouble()
+            return mu + sd * (acc - 3.0) / sqrt(0.5)
         }
     }
 
-    // --- Нормализация признаков ---
-    // Площадь (~30..120) и цена (~70..240) — числа большого масштаба, поэтому
-    // "сырой" градиент получается огромным, и любая скорость обучения на разумный
-    // взгляд диапазон почти сразу уводит модель в расхождение (это и была причина
-    // того, что график казался нечувствительным к параметрам — он всегда либо
-    // "ничего не делал", либо сразу "разваливался"). Стандартное решение —
-    // считать градиентный спуск в нормализованных координатах (среднее 0,
-    // стандартное отклонение 1), а затем пересчитывать веса обратно в реальные
-    // единицы для отображения. Так скорость обучения ведёт себя предсказуемо
-    // в удобном диапазоне (как у логистической регрессии), а не в диапазоне
-    // тысячных долей процента.
-    private val areaMean: Float by lazy { trainSet.map { it.area }.average().toFloat() }
-    private val areaStd: Float by lazy {
-        val m = areaMean
-        kotlin.math.sqrt(trainSet.map { (it.area - m) * (it.area - m) }.average()).toFloat().coerceAtLeast(1e-3f)
-    }
-    private val priceMean: Float by lazy { trainSet.map { it.price }.average().toFloat() }
-    private val priceStd: Float by lazy {
-        val m = priceMean
-        kotlin.math.sqrt(trainSet.map { (it.price - m) * (it.price - m) }.average()).toFloat().coerceAtLeast(1e-3f)
-    }
-
-    private fun toRealWeights(a: Float, b: Float): Pair<Float, Float> {
-        val w1 = a * priceStd / areaStd
-        val w0 = priceMean + priceStd * b - w1 * areaMean
-        return w1 to w0
-    }
-
-    /** Один шаг градиентного спуска по MSE в нормализованных координатах. Настоящий расчёт, не имитация. */
-    private fun gradientStepNormalized(data: List<PricePoint>, a: Float, b: Float, lr: Float): Pair<Float, Float> {
-        var gradA = 0f
-        var gradB = 0f
-        data.forEach { p ->
-            val xn = (p.area - areaMean) / areaStd
-            val yn = (p.price - priceMean) / priceStd
-            val error = (a * xn + b) - yn
-            gradA += error * xn
-            gradB += error
+    /**
+     * История атак. [ampRate] — доля атак с амплификацией; она возможна
+     * только при небольшом ботнете (усилителем работают чужие серверы, своих
+     * узлов много не нужно), поэтому выбросы садятся в левой части графика
+     * и перекашивают прямую сильнее, чем если бы были разбросаны равномерно.
+     */
+    fun generate(ampRate: Double, seed: Long = 42L, n: Int = SAMPLE_COUNT): List<AttackSample> {
+        val rnd = Lcg(seed)
+        val out = ArrayList<AttackSample>(n)
+        for (i in 0 until n) {
+            val nodes = NODES_MIN + rnd.nextDouble() * (NODES_MAX - NODES_MIN)
+            var bw = TRUE_K * nodes + TRUE_B + rnd.gauss(0.0, 3.2)
+            if (nodes < 35.0 && rnd.nextDouble() < ampRate) {
+                bw += 25.0 + rnd.nextDouble() * 45.0
+            }
+            out.add(AttackSample(nodes, maxOf(0.1, bw)))
         }
-        gradA = 2f * gradA / data.size
-        gradB = 2f * gradB / data.size
-        return (a - lr * gradA) to (b - lr * gradB)
+        return out
     }
 
-    data class FitResult(val w1: Float, val w0: Float, val diverged: Boolean, val mseHistory: List<Float>)
+    // ------------------------------------------------------------------
+    // Обучение
+    // ------------------------------------------------------------------
 
-    /** Полный прогон градиентного спуска на [epochs] эпох. */
-    fun fitGradientDescent(lr: Float, epochs: Int): FitResult {
-        var a = 0f
-        var b = 0f
-        val history = mutableListOf<Float>()
+    class FitResult(
+        val k: Double,
+        val b: Double,
+        val mu: Double,
+        val sd: Double,
+        val diverged: Boolean,
+        val epochsDone: Int,
+        val lossHistory: DoubleArray
+    ) {
+        /** Наклон в «Гбит/с на тысячу узлов» — то, что можно произнести вслух. */
+        val slopeReal: Double get() = k / sd
+        /** Свободный член в гигабитах. */
+        val interceptReal: Double get() = b - k * mu / sd
+
+        fun predict(nodes: Double): Double = k * ((nodes - mu) / sd) + b
+    }
+
+    fun fit(
+        data: List<AttackSample>,
+        lr: Double,
+        epochs: Int,
+        normalize: Boolean,
+        lambda: Double
+    ): FitResult {
+        var mu = 0.0
+        var sd = 1.0
+        if (normalize) {
+            var sum = 0.0
+            for (p in data) sum += p.nodes
+            mu = sum / data.size
+            var acc = 0.0
+            for (p in data) acc += (p.nodes - mu) * (p.nodes - mu)
+            sd = sqrt(acc / data.size)
+            if (sd < 1e-9) sd = 1.0
+        }
+
+        var k = 0.0
+        var b = 0.0
+        val n = data.size
+        val history = DoubleArray(epochs)
 
         for (e in 0 until epochs) {
-            val (na, nb) = gradientStepNormalized(trainSet, a, b, lr)
-            a = na
-            b = nb
-            if (a.isNaN() || b.isNaN() || kotlin.math.abs(a) > 1e4f || kotlin.math.abs(b) > 1e4f) {
-                return FitResult(0f, 0f, true, history)
+            var gk = 0.0
+            var gb = 0.0
+            var loss = 0.0
+            for (p in data) {
+                val xn = (p.nodes - mu) / sd
+                val err = k * xn + b - p.bandwidth
+                gk += err * xn
+                gb += err
+                loss += err * err
             }
-            val (w1, w0) = toRealWeights(a, b)
-            history.add(mse(trainSet, w1, w0))
+            k -= lr * (gk / n + lambda * k)
+            b -= lr * (gb / n)
+            history[e] = loss / n
+            if (k.isNaN() || b.isNaN() || abs(k) > 1e9) {
+                return FitResult(k, b, mu, sd, true, e + 1, history.copyOf(e + 1))
+            }
         }
-        val (w1, w0) = toRealWeights(a, b)
-        val finalMse = mse(trainSet, w1, w0)
-        // "Разошлось" — это не только когда веса улетели в бесконечность, но и когда
-        // итоговая ошибка стала заметно хуже, чем тривиальный прогноз "средняя цена
-        // по выборке" (baseline). Проверка по сырой величине весов пропускала случаи
-        // вроде lr, при котором модель попадает в неустойчивые колебания и даёт явно
-        // негодный, но при этом не астрономически большой по модулю результат.
-        val baselineMse = priceStd * priceStd
-        val diverged = finalMse.isNaN() || finalMse > baselineMse * 3f
-        return FitResult(w1, w0, diverged, history)
+        return FitResult(k, b, mu, sd, false, epochs, history)
     }
 
-    /** Точное решение методом наименьших квадратов (нормальное уравнение для одного признака). */
-    fun closedFormFit(): Pair<Float, Float> {
-        val n = trainSet.size
-        val meanX = trainSet.sumOf { it.area.toDouble() } / n
-        val meanY = trainSet.sumOf { it.price.toDouble() } / n
-        var num = 0.0
-        var den = 0.0
-        trainSet.forEach { p ->
-            num += (p.area - meanX) * (p.price - meanY)
-            den += (p.area - meanX) * (p.area - meanX)
+    // ------------------------------------------------------------------
+    // Метрики
+    // ------------------------------------------------------------------
+
+    class Metrics(val mse: Double, val mae: Double, val r2: Double)
+
+    fun metrics(data: List<AttackSample>, f: FitResult): Metrics {
+        val n = data.size
+        var ysum = 0.0
+        for (p in data) ysum += p.bandwidth
+        val ybar = ysum / n
+
+        var sse = 0.0
+        var sae = 0.0
+        var sst = 0.0
+        for (p in data) {
+            val pred = f.predict(p.nodes)
+            val r = pred - p.bandwidth
+            sse += r * r
+            sae += abs(r)
+            sst += (p.bandwidth - ybar) * (p.bandwidth - ybar)
         }
-        val w1 = (num / den).toFloat()
-        val w0 = (meanY - w1 * meanX).toFloat()
-        return w1 to w0
+        return Metrics(sse / n, sae / n, if (sst > 0.0) 1.0 - sse / sst else 0.0)
     }
 
-    fun mse(data: List<PricePoint>, w1: Float, w0: Float): Float {
-        if (data.isEmpty()) return 0f
-        return data.sumOf {
-            val err = (w1 * it.area + w0) - it.price
-            (err * err).toDouble()
-        }.toFloat() / data.size
+    /** Максимальная полоса в выборке — нужна для масштаба вертикальной оси. */
+    fun maxBandwidth(data: List<AttackSample>): Double {
+        var mx = 1.0
+        for (p in data) if (p.bandwidth > mx) mx = p.bandwidth
+        return mx
     }
 
-    fun r2(data: List<PricePoint>, w1: Float, w0: Float): Float {
-        if (data.isEmpty()) return 0f
-        val meanY = data.sumOf { it.price.toDouble() } / data.size
-        val ssRes = data.sumOf {
-            val err = (w1 * it.area + w0) - it.price
-            (err * err).toDouble()
-        }
-        val ssTot = data.sumOf {
-            val d = it.price - meanY
-            (d * d)
-        }
-        if (ssTot == 0.0) return 0f
-        return (1.0 - ssRes / ssTot).toFloat()
-    }
+    /** Предел скорости обучения без нормализации — подписывается в интерактиве
+     *  как справочная величина, найденная симуляцией. */
+    const val UNNORMALIZED_LIMIT = 0.0008
 }

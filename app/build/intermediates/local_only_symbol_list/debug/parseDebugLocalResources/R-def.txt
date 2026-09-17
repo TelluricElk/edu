@@ -21,3 +21,4 @@ string app_name
 style ButtonDark
 style Theme.EduAppML
 style Theme.EduAppML.Splash
+xml file_paths

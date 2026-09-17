@@ -8,6 +8,10 @@
         "source": "C:\\Users\\sasaa\\.gradle\\daemon\\8.13\\com.eduappml.app-main-66:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
     },
     {
+        "merged": "C:\\Users\\sasaa\\.gradle\\daemon\\8.13\\com.eduappml.app-debug-64:\\drawable-nodpi_emblem_krasnodar.png.flat",
+        "source": "C:\\Users\\sasaa\\.gradle\\daemon\\8.13\\com.eduappml.app-main-66:\\drawable-nodpi\\emblem_krasnodar.png"
+    },
+    {
         "merged": "C:\\Users\\sasaa\\.gradle\\daemon\\8.13\\com.eduappml.app-debug-64:\\mipmap-mdpi_ic_launcher_background.png.flat",
         "source": "C:\\Users\\sasaa\\.gradle\\daemon\\8.13\\com.eduappml.app-main-66:\\mipmap-mdpi\\ic_launcher_background.png"
     },
@@ -80,10 +84,6 @@
         "source": "C:\\Users\\sasaa\\.gradle\\daemon\\8.13\\com.eduappml.app-main-66:\\mipmap-hdpi\\ic_launcher_round.png"
     },
     {
-        "merged": "com.eduappml.app-debug-64:/drawable-nodpi_emblem_krasnodar.png.flat",
-        "source": "com.eduappml.app-main-66:/drawable-nodpi/emblem_krasnodar.png"
-    },
-    {
         "merged": "C:\\Users\\sasaa\\.gradle\\daemon\\8.13\\com.eduappml.app-debug-64:\\drawable_bg_gradient_dark.xml.flat",
         "source": "C:\\Users\\sasaa\\.gradle\\daemon\\8.13\\com.eduappml.app-main-66:\\drawable\\bg_gradient_dark.xml"
     },
@@ -106,5 +106,9 @@
     {
         "merged": "C:\\Users\\sasaa\\.gradle\\daemon\\8.13\\com.eduappml.app-debug-64:\\mipmap-hdpi_ic_launcher_background.png.flat",
         "source": "C:\\Users\\sasaa\\.gradle\\daemon\\8.13\\com.eduappml.app-main-66:\\mipmap-hdpi\\ic_launcher_background.png"
+    },
+    {
+        "merged": "com.eduappml.app-debug-64:/xml_file_paths.xml.flat",
+        "source": "com.eduappml.app-main-66:/xml/file_paths.xml"
     }
 ]
